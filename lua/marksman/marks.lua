@@ -17,7 +17,8 @@ local function get_config_options()
     return config.options or config.defaults
 end
 
--- #:# Get Marks
+-- Get all marks in current buffer, sorted by configured method
+-- @return {table} List of marks with structure: {mark, lnum, display, timestamp}
 function M.get_marks()
     -- Re-initialize marks_list on refresh
     local marks_list = {}
