@@ -1,0 +1,393 @@
+# Marksman Plugin - Quick Reference Guide
+
+## What is Marksman?
+
+Marksman is a Neovim plugin that enhances the native Vim mark system with visual feedback and modern UI. The flagship feature is **Night Vision** - a real-time visual highlighting system that shows you exactly where your marks are placed in the buffer.
+
+## Core Problem Solved
+
+Vim marks are powerful but invisible. You set them with `ma`, `mb`, etc., but then you forget where they are. Marksman solves this by:
+- Highlighting marked lines in real-time
+- Showing mark letters in the gutter
+- Adding decorative icons as visual anchors
+- Providing a Telescope picker to browse marks
+- Remembering when marks were created (timestamps)
+
+## Key Features at a Glance
+
+| Feature | Purpose | Highlight |
+|---------|---------|-----------|
+| **Manual Marks** | Set marks with `ma`, `mb`, etc. (a-z) | Native Vim integration |
+| **Auto-Mark** | Automatically assign next free letter | Smart: finds a-z gaps |
+| **Night Vision** | Visual highlighting of marked lines | Smart icon toggling |
+| **Mark Navigation** | Jump forward/backward between marks | Wraparound at edges |
+| **Telescope Picker** | Browse and jump to marks | Fast letter hotkeys |
+| **Timestamps** | Track when marks were created | Sort by recency |
+| **Smart Deletion** | Delete single marks or all marks | Preserves visual state |
+| **Per-Buffer State** | Independent Night Vision per buffer | Multi-window friendly |
+
+## Installation
+
+### Using Lazy.nvim
+```lua
+{
+    "jinks908/marksman.nvim",
+    dependencies = { "nvim-telescope/telescope.nvim" },
+    config = function()
+        require('marksman').setup()
+    end
+}
+```
+
+### Using Packer
+```lua
+use {
+    'jinks908/marksman.nvim',
+    requires = 'nvim-telescope/telescope.nvim'
+}
+```
+
+## Basic Setup
+
+```lua
+require('marksman').setup({
+    night_vision = {
+        enabled = true,              -- Enable Night Vision on startup
+        line_highlight = true,       -- Highlight line background
+        line_nr_highlight = true,    -- Highlight line numbers
+        sign_column = "letter",      -- Show "letter", "icon", or "none"
+        sort_by = "line",            -- Sort by "line", "alphabetical", or "recency"
+        silent = true,               -- Suppress notifications
+    }
+})
+```
+
+## Essential API Functions
+
+```lua
+local marksman = require('marksman')
+
+-- Mark Operations
+marksman.set_mark('a')              -- Set mark 'a' at cursor
+marksman.auto_mark()                -- Auto-assign next free letter
+marksman.next_mark(true)            -- Jump to next mark
+marksman.next_mark(false)           -- Jump to previous mark
+marksman.delete_mark()              -- Delete mark on current line
+marksman.delete_by_letter('a')      -- Delete specific mark
+marksman.delete_all_marks()         -- Clear all marks in buffer
+
+-- Night Vision Control
+marksman.night_vision()             -- Toggle Night Vision on/off
+marksman.refresh()                  -- Refresh Night Vision display
+```
+
+## Recommended Keymaps
+
+```lua
+local marksman = require('marksman')
+local opts = { noremap = true, silent = true }
+
+-- Auto-mark
+vim.keymap.set('n', '<leader>m', marksman.auto_mark, opts)
+
+-- Navigate marks
+vim.keymap.set('n', '<M-]>', function() marksman.next_mark(true) end, opts)
+vim.keymap.set('n', '<M-[>', function() marksman.next_mark(false) end, opts)
+
+-- Delete marks
+vim.keymap.set('n', '<leader>dm', marksman.delete_mark, opts)
+vim.keymap.set('n', '<leader>dam', marksman.delete_all_marks, opts)
+
+-- Toggle Night Vision
+vim.keymap.set('n', '<leader>nv', marksman.night_vision, opts)
+
+-- Open Telescope picker
+vim.keymap.set('n', '<C-m>', '<cmd>Telescope marksman marks<CR>', opts)
+
+-- Quick mark letters (ma, mb, mc, etc.)
+for i = 97, 122 do
+    local key = string.char(i)
+    vim.keymap.set('n', 'm' .. key, function()
+        marksman.set_mark(key)
+    end, opts)
+end
+```
+
+## Telescope Picker Usage
+
+Open with `:Telescope marksman marks` or mapped key (e.g., `<C-m>`)
+
+**In the picker:**
+- Type letter (e.g., `a`) - Jump to that mark instantly
+- `<CR>` - Select and jump to highlighted mark
+- `<C-d>` - Delete selected mark
+- `<C-i>` - Switch to insert mode for filtering
+- `<C-k>/<C-l>` - Navigate marks (normal mode)
+
+## Configuration Options
+
+### Night Vision Settings
+
+```lua
+night_vision = {
+    enabled = true,                 -- Auto-enable on plugin load
+    line_highlight = true,          -- Background color on marked lines
+    line_nr_highlight = true,       -- Highlight line numbers
+    sign_column = "letter",         -- Show in gutter: "letter", "icon", "none"
+    sort_by = "line",               -- Sort marks: "line", "alphabetical", "recency"
+    silent = true,                  -- No notification messages
+    highlights = {
+        line = { fg = "#000000", bg = "#5fd700" },
+        line_nr = { fg = "#5fd700", bg = "NONE", bold = true },
+        virtual_text = { fg = "#5fd700", bg = "NONE" },
+    },
+}
+```
+
+### Color Customization
+
+```lua
+highlights = {
+    mark = {
+        fg = "#ffaf00",
+        bg = "NONE",
+        bold = true,
+    },
+    mark_selected = {
+        fg = "NONE",
+        bg = "#2A314C",
+        bold = true,
+    },
+    line_nr = {
+        fg = "#00aeff",
+        bg = "NONE",
+        bold = true,
+    },
+}
+```
+
+### Telescope Picker Layout
+
+```lua
+layout_config = {
+    width = 0.95,        -- Width as percentage of screen
+    height = 0.5,        -- Height as percentage of screen
+    preview_width = 0.7, -- Preview column width
+}
+```
+
+## How Night Vision Works
+
+### Visual Components
+
+When Night Vision is **ON**, marked lines display:
+
+1. **Line Background** - Colored background across entire line
+2. **Line Number** - Colored line number in gutter
+3. **Sign Column** - Mark letter or icon in left gutter
+4. **Virtual Text Icon** - Decorative icon (right-aligned, auto-hides when cursor on line)
+
+### Smart Icon Behavior
+
+The virtual text icon:
+- **Appears** when cursor is NOT on the line (visual anchor)
+- **Disappears** when cursor IS on the line (clean editing)
+- Updates smoothly as you navigate
+
+This reduces visual clutter while editing marked lines.
+
+### Per-Buffer State
+
+Each buffer maintains independent Night Vision state:
+- You can toggle NV on for file A and off for file B
+- Multi-window editing shows different visual states per window
+- Marks persist even when NV is off
+
+## Storage and Persistence
+
+### Mark Timestamps
+- Stored in: `~/.local/share/nvim/marksman/`
+- One JSON file per buffer (hashed by file path)
+- Format: `{mark_letter: unix_timestamp}`
+- Auto-cleanup: Files older than 30 days removed
+
+### Why Timestamps?
+- Enable "recency" sorting (`sort_by = "recency"`)
+- Track when marks were created
+- Find recently-modified locations quickly
+
+## Use Cases
+
+### Development
+- Mark important functions/classes
+- Highlight bug locations during debugging
+- Visual anchors during code review
+- Jump between related code sections
+
+### Writing
+- Mark sections under review
+- Highlight areas needing rewrite
+- Navigate between work locations
+- Track editing progress
+
+### Research
+- Mark relevant sections
+- Highlight key findings
+- Quick navigation between sources
+- Visual reference points
+
+## Performance Notes
+
+- **Minimal overhead**: ~1-2% CPU when idle with Night Vision on
+- **Fast cursor tracking**: Sub-millisecond virtual text updates
+- **Efficient storage**: JSON files ~100 bytes per mark
+- **Smart updates**: Only updates changed lines on cursor move
+
+## Common Workflows
+
+### Quick Navigation Workflow
+```
+1. ma               ← Mark section A
+2. mb               ← Mark section B
+3. <M-]>            ← Jump to next mark
+4. <M-[>            ← Jump to previous mark
+5. <C-m>            ← Open picker to browse all marks
+6. <leader>dm       ← Delete mark when done
+```
+
+### Debugging Workflow
+```
+1. <leader>m        ← Auto-mark error line
+2. <leader>m        ← Auto-mark suspicious line
+3. <C-m>            ← Open picker to see all problem areas
+4. <M-]>/<M-[>      ← Jump between marked locations
+5. <leader>dam      ← Clear all marks after fixing
+```
+
+### Multi-File Workflow
+```
+1. ma (file1)       ← Mark location in file 1
+2. :e file2         ← Open file 2
+3. mb (file2)       ← Mark location in file 2
+4. <leader>nv       ← Toggle Night Vision
+5. <C-m>            ← Jump between files using picker
+```
+
+## Troubleshooting
+
+### Night Vision not showing
+- Ensure `night_vision.enabled = true` in setup
+- Check that marks exist in current buffer (`:marks`)
+- Try `<leader>nv` to toggle on if toggled off
+
+### Icons not disappearing when cursor on line
+- This is expected behavior - icons hide when editing marked lines
+- Move cursor away to see icons reappear
+
+### Marks not persisting across sessions
+- Marks are Vim native - they don't persist by default
+- Plugin only adds visual feedback and timestamps
+- Use a session plugin if persistence needed
+
+### Telescope picker not working
+- Ensure telescope.nvim is installed
+- Check that `require('telescope').load_extension('marksman')` called
+- Try `:Telescope marksman marks` directly
+
+## Dependencies
+
+- **Required**: Neovim 0.8.0+
+- **Optional**: nvim-telescope/telescope.nvim (for picker UI)
+
+Without Telescope, core mark operations still work - just no picker.
+
+## File Locations
+
+- **Plugin files**: `~/.config/nvim/lua/marksman/`
+- **Timestamp storage**: `~/.local/share/nvim/marksman/`
+- **Telescope extension**: `lua/telescope/_extensions/marksman/`
+
+## Architecture Overview
+
+```
+User Input
+    ↓
+marks.lua (Mark operations)
+    ↓
+data.lua (Persist timestamps)
+    ↓
+night_vision.lua (Visual highlights)
+    ↓
+Telescope picker (UI browsing)
+```
+
+Each module is independent and can be used separately.
+
+## Advanced Configuration Examples
+
+### Minimal Setup (Marks Only, No Night Vision)
+```lua
+require('marksman').setup({
+    night_vision = {
+        enabled = false
+    }
+})
+```
+
+### Visual-Heavy Setup (Everything Highlighted)
+```lua
+require('marksman').setup({
+    night_vision = {
+        enabled = true,
+        line_highlight = true,
+        line_nr_highlight = true,
+        sign_column = "letter",
+        sort_by = "recency",
+    },
+    highlights = {
+        line = { fg = "#ffffff", bg = "#ff0000", bold = true },
+        line_nr = { fg = "#ffff00", bg = "NONE", bold = true },
+        virtual_text = { fg = "#ffff00" },
+    }
+})
+```
+
+### Quiet Mode (No Notifications)
+```lua
+require('marksman').setup({
+    night_vision = {
+        silent = true
+    }
+})
+```
+
+## Keyboard Cheat Sheet
+
+| Action | Default | Custom Option |
+|--------|---------|---------------|
+| Auto-mark | None | `<leader>m` |
+| Next mark | None | `<M-]>` |
+| Prev mark | None | `<M-[>` |
+| Toggle NV | None | `<leader>nv` |
+| Open picker | None | `<C-m>` |
+| Delete mark | None | `<leader>dm` |
+| Delete all | None | `<leader>dam` |
+| Manual mark | `m{a-z}` | `m` + letter (built-in) |
+
+## Best Practices
+
+1. **Use Auto-Mark for Speed**: `<leader>m` is faster than `ma`, `mb`, etc.
+2. **Sort by Recency**: Great for resuming work after interruptions
+3. **Keep Mark Count Low**: 5-10 marks per file is ideal
+4. **Toggle NV as Needed**: Turn off if visual clutter bothers you
+5. **Use Picker for Browsing**: Fastest way to see all marks at once
+
+## Resources
+
+- **GitHub**: `jinks908/marksman.nvim`
+- **Issues**: Report bugs and feature requests
+- **Documentation**: See inline comments in `lua/marksman/*.lua`
+
+---
+
+*Last Updated: 2025-12-21 | Plugin Version: 1.0+ | Neovim: 0.8.0+*
