@@ -1,8 +1,8 @@
-# Marksman Plugin - Quick Reference Guide
+# Marksman for Neovim
 
 ## What is Marksman?
 
-Marksman is a Neovim plugin that enhances the native Vim mark system with visual feedback and modern UI. The flagship feature is **Night Vision** - a real-time visual highlighting system that shows you exactly where your marks are placed in the buffer.
+**Marksman** is a Neovim plugin that enhances the native Vim mark system with visual feedback and modern UI. The flagship feature is **Night Vision** - a real-time visual highlighting system that shows you exactly where your marks are placed in the buffer.
 
 ## Core Problem Solved
 
