@@ -2,7 +2,8 @@
 
 local has_telescope, telescope = pcall(require, 'telescope')
 if not has_telescope then
-    error('This plugin requires nvim-telescope/telescope.nvim')
+    vim.notify('Telescope plugin not found. Marksman picker disabled.', vim.log.levels.WARN)
+    return {}
 end
 
 -- Remove the setup function entirely since we're handling config in the main plugin

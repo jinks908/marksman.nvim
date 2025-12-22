@@ -1,4 +1,6 @@
 .DS_Store
+.luarc.json
+.luacheckrc
 ISSUE_LOCATIONS.md
 ANALYSIS_SUMMARY.txt
 QUICK_FIX_GUIDE.txt

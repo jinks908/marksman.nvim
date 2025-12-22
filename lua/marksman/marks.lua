@@ -103,6 +103,12 @@ end
 -- #:# Set Manual Mark
 M.set_mark = function(letter)
     local line_num = vim.api.nvim_win_get_cursor(0)[1]
+
+    if not letter or #letter ~= 1 or not letter:match('[a-z]') then
+        vim.notify("Invalid mark letter: must be single lowercase a-z", vim.log.levels.ERROR)
+        return
+    end
+
     vim.cmd("normal! m" .. letter)
     data.add_timestamp(letter)
     if night_vision and night_vision.nv_state then

@@ -30,7 +30,7 @@ M.defaults = {
         enabled = true,
         line_highlight = true,
         line_nr_highlight = true,
-        sign_column = "icon",
+        sign_column = "letter",
         sort_by = "line",
         silent = true,
         highlights = {
@@ -80,7 +80,7 @@ function M.validate_config()
         return false
     end
     if not valid_sort_options[options.night_vision.sort_by] then
-        vim.notify({ 'Invalid sort_by option: "' .. options.night_vision.sort_by .. '"', 'Must be either: "line" or "alphabetical"', 'Defaulting to "line"' }, vim.log.levels.ERROR, { timeout = 4000 })
+        vim.notify({ 'Invalid sort_by option: "' .. options.night_vision.sort_by .. '"', 'Must be: "line", "alphabetical", or "recency"', 'Defaulting to "line"' }, vim.log.levels.ERROR, { timeout = 4000 })
         options.night_vision.sort_by = "line"
         return false
     end
