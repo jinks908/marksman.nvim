@@ -1,4 +1,22 @@
--- lua/marksman/marks.lua
+--- lua/marksman/marks.lua
+---
+--- Mark management module for Marksman plugin
+---
+--- Handles all mark-related operations including:
+---   - Setting and deleting marks (a-z)
+---   - Retrieving marks with metadata (line number, content, timestamp)
+---   - Sorting marks by different criteria (line, alphabetical, recency)
+---   - Integrating with Night Vision visual feedback
+---   - Notifying user on mark operations
+---
+--- Public API:
+---   - set_mark(letter): Set mark at current cursor position
+---   - auto_mark(): Auto-assign next available mark letter (a-z)
+---   - next_mark(forward): Jump to next or previous mark
+---   - delete_mark(): Delete mark on current line
+---   - delete_by_letter(letter): Delete specific mark by letter
+---   - delete_all_marks(): Clear all marks in current buffer
+---   - get_marks(): Get all marks with metadata, sorted by config preference
 
 local M = {}
 local config = require('marksman.config')
@@ -17,8 +35,9 @@ local function get_config_options()
     return config.options or config.defaults
 end
 
--- Get all marks in current buffer, sorted by configured method
--- @return {table} List of marks with structure: {mark, lnum, display, timestamp}
+--- Get all marks in current buffer with metadata
+--- Returns marks sorted by configured method (line, alphabetical, or recency)
+--- @return table List of marks with structure: {mark=letter, lnum=number, display=string, timestamp=number}
 function M.get_marks()
     -- Re-initialize marks_list on refresh
     local marks_list = {}
@@ -99,7 +118,9 @@ local function get_first_available_mark()
     return nil
 end
 
--- Set mark manually (using native 'm' command)
+--- Set a mark at the current cursor position
+--- @param letter string Single lowercase letter (a-z) to use as mark
+--- @return nil
 M.set_mark = function(letter)
     local line_num = vim.api.nvim_win_get_cursor(0)[1]
 
@@ -119,7 +140,9 @@ M.set_mark = function(letter)
     end
 end
 
--- Function to auto-mark current line
+--- Auto-assign the next available mark letter at current cursor position
+--- Searches for first unused letter from a-z
+--- @return nil
 M.auto_mark = function()
     local free_mark = get_first_available_mark()
     local line_num = vim.api.nvim_win_get_cursor(0)[1]
@@ -141,7 +164,10 @@ M.auto_mark = function()
     end
 end
 
--- Function to jump to next/previous mark
+--- Jump to next or previous mark in current buffer
+--- Wraps around at edges (loops from last to first or vice versa)
+--- @param forward boolean true to jump forward, false to jump backward
+--- @return nil
 M.next_mark = function(forward)
     local current_line = vim.fn.line('.')
     local current_marks = M.get_marks()
@@ -185,7 +211,8 @@ M.next_mark = function(forward)
     end
 end
 
--- Function to auto-delete mark on current line
+--- Delete the mark on the current line
+--- @return nil
 M.delete_mark = function()
     local current_line = vim.fn.line('.')
     local current_marks = M.get_marks()
@@ -216,7 +243,9 @@ M.delete_mark = function()
     vim.notify(' No mark on current line', vim.log.levels.WARN, { title = " Marksman  " })
 end
 
--- Delete Mark by Letter 
+--- Delete a specific mark by letter
+--- @param letter string Mark letter (a-z) to delete
+--- @return nil
 M.delete_by_letter = function(letter)
     local current_marks = M.get_marks()
     for i = 1, #current_marks do
@@ -237,7 +266,9 @@ M.delete_by_letter = function(letter)
     vim.notify(" Mark '" .. letter .. "' not set.", vim.log.levels.WARN, { title = " Marksman  " })
 end
 
--- Function to delete all local marks in current buffer
+--- Delete all marks in the current buffer
+--- Also clears all stored timestamps for marks in this buffer
+--- @return nil
 M.delete_all_marks = function()
     -- Delete all lowercase (local) marks
     vim.cmd('delmarks a-z')

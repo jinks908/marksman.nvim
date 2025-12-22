@@ -1,4 +1,25 @@
--- lua/marksman/init.lua
+--- lua/marksman/init.lua
+---
+--- Marksman - Main plugin module and setup entry point
+---
+--- Handles plugin initialization, setup, and public API exports.
+--- Manages all submodules (marks, night_vision, data, config) and
+--- sets up necessary autocommands and event handlers.
+---
+--- Public API:
+---   - setup(opts): Initialize plugin with configuration
+---   - set_mark(letter): Set mark at cursor position
+---   - auto_mark(): Auto-assign next available mark letter
+---   - next_mark(forward): Jump to next/previous mark
+---   - delete_mark(): Delete mark on current line
+---   - delete_by_letter(letter): Delete specific mark
+---   - delete_all_marks(): Clear all marks in buffer
+---   - night_vision(): Toggle Night Vision highlighting
+---   - refresh(): Refresh Night Vision display
+---   - hide_line(lnum): Hide Night Vision on specific line
+---   - show_line(lnum): Show Night Vision on specific line
+---   - version: Plugin version string
+---   - min_nvim_version: Minimum required Neovim version
 
 local M = {}
 
@@ -8,7 +29,9 @@ M.min_nvim_version = "0.8.0"
 -- Store setup state
 local setup_done = false
 
--- Setup function
+--- Initialize Marksman plugin with configuration options
+--- @param opts? table User configuration options (see config.lua for defaults)
+--- @return nil
 function M.setup(opts)
     -- Check Neovim version
     if vim.fn.has("nvim-" .. M.min_nvim_version) == 0 then

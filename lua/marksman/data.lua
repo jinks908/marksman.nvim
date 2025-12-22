@@ -1,4 +1,24 @@
--- lua/marksman/data.lua
+--- lua/marksman/data.lua
+---
+--- Data persistence module for Marksman plugin
+---
+--- Handles timestamp storage and retrieval for marks:
+---   - Saves mark creation timestamps to JSON files
+---   - Loads timestamps on buffer entry
+---   - Cleans up old timestamp files (30+ days)
+---   - Provides error handling and recovery for file I/O operations
+---
+--- Timestamps are stored in ~/.local/share/nvim/marksman/
+--- with filenames based on buffer path hash to avoid collisions.
+---
+--- Public API:
+---   - save_timestamps(): Save current buffer's timestamps to disk
+---   - load_timestamps(): Load timestamps for current buffer from disk
+---   - add_timestamp(mark): Record creation time for a mark
+---   - remove_timestamp(mark): Remove timestamp for a mark
+---   - get_timestamp(mark): Get creation time for a mark
+---   - clear_timestamps(): Clear all timestamps in current buffer
+---   - cleanup_timestamp_files(): Remove files older than 30 days
 
 local M = {}
 local fn = vim.fn
@@ -34,7 +54,8 @@ local function get_timestamp_file()
     return string.format('%s/%s.json', get_data_dir(), hash)
 end
 
--- Modified save function
+--- Save current buffer's mark timestamps to disk
+--- @return nil
 function M.save_timestamps()
     local file_path = get_timestamp_file()
     if not file_path then
@@ -72,7 +93,8 @@ function M.save_timestamps()
     end
 end
 
--- Modified load function
+--- Load mark timestamps for current buffer from disk
+--- @return nil
 function M.load_timestamps()
     local file_path = get_timestamp_file()
     if not file_path or fn.filereadable(file_path) == 0 then
@@ -112,30 +134,38 @@ function M.load_timestamps()
     end
 end
 
--- Add timestamp for a mark
+--- Record creation timestamp for a mark
+--- @param mark string Mark letter (a-z)
+--- @return nil
 function M.add_timestamp(mark)
     M.timestamps[mark] = os.time()
     M.save_timestamps()
 end
 
--- Remove timestamp for a mark
+--- Remove timestamp for a mark
+--- @param mark string Mark letter (a-z)
+--- @return nil
 function M.remove_timestamp(mark)
     M.timestamps[mark] = nil
     M.save_timestamps()
 end
 
--- Get timestamp for a mark
+--- Get creation timestamp for a mark (Unix time, 0 if not found)
+--- @param mark string Mark letter (a-z)
+--- @return number Unix timestamp or 0 if mark has no timestamp
 function M.get_timestamp(mark)
     return M.timestamps[mark] or 0
 end
 
--- Clear all timestamps
+--- Clear all timestamps for current buffer
+--- @return nil
 function M.clear_timestamps()
     M.timestamps = {}
     M.save_timestamps()
 end
 
--- Remove files older than 30 days
+--- Remove timestamp files older than 30 days
+--- @return nil
 function M.cleanup_timestamp_files()
     local data_dir = get_data_dir()
     local files = vim.fn.glob(data_dir .. '/*.json', false, 1)

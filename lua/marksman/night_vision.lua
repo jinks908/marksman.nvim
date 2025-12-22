@@ -1,4 +1,27 @@
--- lua/marksman/night_vision.lua
+--- lua/marksman/night_vision.lua
+---
+--- Night Vision visual feedback module for Marksman plugin
+---
+--- Handles real-time visual highlighting of marked lines:
+---   - Line background highlighting
+---   - Line number highlighting
+---   - Mark letters/icons in the gutter
+---   - Decorative virtual text icons (smart icon toggling based on cursor position)
+---
+--- Features:
+---   - Per-buffer state management (independent Night Vision per window)
+---   - Smart icon toggling: icons hide when cursor on line, show when away
+---   - Smooth updates on cursor movement
+---   - Automatic application to new buffers
+---   - Clean removal of signs when toggling off
+---
+--- Public API:
+---   - toggle(): Toggle Night Vision on/off for current buffer
+---   - refresh(): Refresh Night Vision display in current buffer
+---   - hide_line(lnum): Hide Night Vision decorations on specific line
+---   - show_line(lnum): Show Night Vision decorations on specific line
+---   - update_virtual_text_for_cursor(): Update virtual text based on cursor position
+---   - setup_highlights(): Configure highlight groups for Night Vision
 
 local M = {}
 local config = require('marksman.config')
@@ -14,7 +37,7 @@ local ns_id = vim.api.nvim_create_namespace('Marksman')
 local ns_id_vt = vim.api.nvim_create_namespace('MarksmanVT')
 
 -- Define the virtual text icon for Night Vision
-local nv_icon = '  '
+local nv_icon = '  '
 
 -- Buffer-specific sign tracking
 local buffer_signs = {}
@@ -100,7 +123,8 @@ local function refresh_all_virtual_text()
     end
 end
 
--- Setup highlight groups
+--- Setup highlight groups for Night Vision
+--- @return nil
 function M.setup_highlights()
     local options = get_config_options()
     vim.api.nvim_set_hl(0, 'MarksmanMark', options.highlights.mark)
@@ -111,7 +135,9 @@ function M.setup_highlights()
     vim.api.nvim_set_hl(0, 'NightVisionVirtualText', options.night_vision.highlights.virtual_text)
 end
 
--- Direct cursor tracking with per-line state management
+--- Update virtual text decorations based on cursor position
+--- Hides icons when cursor is on a marked line, shows them when cursor is away
+--- @return nil
 function M.update_virtual_text_for_cursor()
     local bufnr = vim.api.nvim_get_current_buf()
 
@@ -187,7 +213,8 @@ function M.update_virtual_text_for_cursor()
 end
 
 
--- Toggle Night Vision mode
+--- Toggle Night Vision on/off for current buffer
+--- @return nil
 function M.toggle()
     local current_marks = marks.get_marks()
     local options = get_config_options()
@@ -268,7 +295,9 @@ function M.toggle()
     M.nv_state[bufnr] = not M.nv_state[bufnr]
 end
 
--- Refresh Night Vision
+--- Refresh Night Vision display in current buffer
+--- Reapplies all marks, highlights, and decorations
+--- @return nil
 function M.refresh()
     local current_marks = marks.get_marks()
     local options = get_config_options()
@@ -329,8 +358,11 @@ function M.refresh()
     M.nv_state[bufnr] = true
 end
 
--- Replace virtual text icon when cursor moves off the line
-M.show_line = function(lnum)
+--- Hide Night Vision decorations on a specific line
+--- Called internally when cursor moves onto a marked line
+--- @param lnum number Line number to hide decorations on
+--- @return nil
+M.hide_line = function(lnum)
     local bufnr = vim.api.nvim_get_current_buf()
 
     -- Validate line number before proceeding
@@ -342,8 +374,11 @@ M.show_line = function(lnum)
     refresh_all_virtual_text()
 end
 
--- Hide virtual text icon when cursor is on the line
-M.hide_line = function(lnum)
+--- Show Night Vision decorations on a specific line
+--- Called internally when cursor moves away from a marked line
+--- @param lnum number Line number to show decorations on
+--- @return nil
+M.show_line = function(lnum)
     local bufnr = vim.api.nvim_get_current_buf()
 
     -- Validate line number before proceeding

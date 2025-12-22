@@ -1,4 +1,15 @@
--- lua/marksman/config.lua
+--- lua/marksman/config.lua
+---
+--- Configuration module for Marksman plugin
+---
+--- Handles configuration loading, merging defaults with user options,
+--- and validating configuration values.
+---
+--- Default configuration includes:
+---   - Highlight colors for marks and Night Vision
+---   - Layout configuration for Telescope picker
+---   - Night Vision settings (enabled, line highlighting, sort order, etc.)
+---   - Keymap settings (enable/disable manual mark keymaps)
 
 local M = {}
 
@@ -66,14 +77,17 @@ local valid_sort_options = {
     recency = true,
 }
 
--- Merge configs
+--- Merge user configuration options with defaults and validate
+--- @param opts? table User configuration options to merge with defaults
+--- @return nil
 function M.setup(opts)
     M.options = vim.tbl_deep_extend("force", M.defaults, opts or {})
     -- Validate after setup
     M.validate_config()
 end
 
--- Validate config
+--- Validate configuration values and notify user of invalid options
+--- @return boolean true if configuration is valid, false otherwise
 function M.validate_config()
     local options = M.options or M.defaults
 
