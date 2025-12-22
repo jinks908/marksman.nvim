@@ -2,11 +2,20 @@
 
 local M = {}
 
+M.version = "1.0.0"
+M.min_nvim_version = "0.8.0"
+
 -- Store setup state
 local setup_done = false
 
 -- Setup function
 function M.setup(opts)
+    -- Check Neovim version
+    if vim.fn.has("nvim-" .. M.min_nvim_version) == 0 then
+        vim.notify("Marksman requires Neovim " .. M.min_nvim_version, vim.log.levels.ERROR)
+        return
+    end
+
     -- Prevent multiple setups
     if setup_done then
         return
