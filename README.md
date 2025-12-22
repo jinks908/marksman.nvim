@@ -9,7 +9,7 @@ Marksman is a Neovim plugin that enhances the native Vim mark system with visual
 Vim marks are powerful but invisible. You set them with `ma`, `mb`, etc., but then you forget where they are. Marksman solves this by:
 - Highlighting marked lines in real-time
 - Showing mark letters in the gutter
-- Adding decorative icons as visual anchors
+- Adding virtual text icons as visual anchors
 - Providing a Telescope picker to browse marks
 - Remembering when marks were created (timestamps)
 
@@ -18,7 +18,7 @@ Vim marks are powerful but invisible. You set them with `ma`, `mb`, etc., but th
 | Feature | Purpose | Highlight |
 |---------|---------|-----------|
 | **Manual Marks** | Set marks with `ma`, `mb`, etc. (a-z) | Native Vim integration |
-| **Auto-Mark** | Automatically assign next free letter | Smart: finds a-z gaps |
+| **Auto-mark** | Automatically assign next free letter | Smart: finds a-z gaps |
 | **Night Vision** | Visual highlighting of marked lines | Smart icon toggling |
 | **Mark Navigation** | Jump forward/backward between marks | Wraparound at edges |
 | **Telescope Picker** | Browse and jump to marks | Fast letter hotkeys |
@@ -55,9 +55,9 @@ require('marksman').setup({
         enabled = true,              -- Enable Night Vision on startup
         line_highlight = true,       -- Highlight line background
         line_nr_highlight = true,    -- Highlight line numbers
-        sign_column = "letter",      -- Show "letter", "icon", or "none"
+        sign_column = "letter",      -- Show in gutter: "letter" (a-z), "icon" (◆), or "none"
         sort_by = "line",            -- Sort by "line", "alphabetical", or "recency"
-        silent = true,               -- Suppress notifications
+        silent = true,               -- Suppress mark operation notifications
     }
 })
 ```
@@ -83,6 +83,8 @@ marksman.refresh()                  -- Refresh Night Vision display
 
 ## Recommended Keymaps
 
+**Note**: The keymaps for `ma-mz` are **automatically registered** when you call `setup()` with `keymaps.enabled = true` (the default). The examples below show how to customize additional keymaps or override the defaults:
+
 ```lua
 local marksman = require('marksman')
 local opts = { noremap = true, silent = true }
@@ -103,15 +105,9 @@ vim.keymap.set('n', '<leader>nv', marksman.night_vision, opts)
 
 -- Open Telescope picker
 vim.keymap.set('n', '<C-m>', '<cmd>Telescope marksman marks<CR>', opts)
-
--- Quick mark letters (ma, mb, mc, etc.)
-for i = 97, 122 do
-    local key = string.char(i)
-    vim.keymap.set('n', 'm' .. key, function()
-        marksman.set_mark(key)
-    end, opts)
-end
 ```
+
+To disable auto-registration of `ma-mz` keymaps, set `keymaps.enabled = false` in your setup config.
 
 ## Telescope Picker Usage
 
@@ -135,7 +131,7 @@ night_vision = {
     line_nr_highlight = true,       -- Highlight line numbers
     sign_column = "letter",         -- Show in gutter: "letter", "icon", "none"
     sort_by = "line",               -- Sort marks: "line", "alphabetical", "recency"
-    silent = true,                  -- No notification messages
+    silent = true,                  -- Suppress mark operation notifications
     highlights = {
         line = { fg = "#000000", bg = "#5fd700" },
         line_nr = { fg = "#5fd700", bg = "NONE", bold = true },
@@ -144,7 +140,15 @@ night_vision = {
 }
 ```
 
-### Color Customization
+**Silent Mode**: When `silent = true`, the following operations are suppressed:
+- Mark setting/updating (from `set_mark()`, `auto_mark()`)
+- Mark deletion (from `delete_mark()`, `delete_by_letter()`, `delete_all_marks()`)
+- Night Vision toggle notifications
+- Navigation warnings (e.g., no marks in buffer)
+
+### Telescope Picker Highlights
+
+This section configures the appearance of marks and selections in the Telescope picker UI:
 
 ```lua
 highlights = {
@@ -175,6 +179,15 @@ layout_config = {
     preview_width = 0.7, -- Preview column width
 }
 ```
+
+### Configuration Validation
+
+The plugin validates certain configuration values and will reset invalid values to defaults with an error notification:
+
+- **`sign_column`**: Must be one of `"letter"` (default), `"icon"`, or `"none"`
+- **`sort_by`**: Must be one of `"line"` (default), `"alphabetical"`, or `"recency"`
+
+Invalid values will trigger an error notification and reset to their defaults.
 
 ## How Night Vision Works
 
@@ -281,7 +294,7 @@ Each buffer maintains independent Night Vision state:
 - Try `<leader>nv` to toggle on if toggled off
 
 ### Icons not disappearing when cursor on line
-- This is expected behavior - icons hide when editing marked lines
+- This is expected behavior - virtual text icons hide when editing marked lines
 - Move cursor away to see icons reappear
 
 ### Marks not persisting across sessions
@@ -310,18 +323,17 @@ Without Telescope, core mark operations still work - just no picker.
 ## Architecture Overview
 
 ```
-User Input
-    ↓
-marks.lua (Mark operations)
-    ↓
-data.lua (Persist timestamps)
-    ↓
-night_vision.lua (Visual highlights)
-    ↓
-Telescope picker (UI browsing)
+init.lua (Plugin initialization & orchestration)
+    ├── marks.lua ↔ night_vision.lua (circular dependency, resolved via init())
+    │   ├── Mark operations (set, auto, delete, navigate)
+    │   └── Visual highlights (line, virtual text, signs)
+    ├── data.lua (Timestamp persistence)
+    │   └── JSON storage: ~/.local/share/nvim/marksman/
+    └── [Optional] telescope extension
+        └── picker.lua (Mark browsing UI)
 ```
 
-Each module is independent and can be used separately.
+Each core module is designed to work independently, with init.lua serving as the orchestrator that handles autocommands and configuration management.
 
 ## Advanced Configuration Examples
 
@@ -376,7 +388,7 @@ require('marksman').setup({
 
 ## Best Practices
 
-1. **Use Auto-Mark for Speed**: `<leader>m` is faster than `ma`, `mb`, etc.
+1. **Use Auto-mark for Speed**: `<leader>m` is faster than `ma`, `mb`, etc.
 2. **Sort by Recency**: Great for resuming work after interruptions
 3. **Keep Mark Count Low**: 5-10 marks per file is ideal
 4. **Toggle NV as Needed**: Turn off if visual clutter bothers you
@@ -390,4 +402,4 @@ require('marksman').setup({
 
 ---
 
-*Last Updated: 2025-12-21 | Plugin Version: 1.0+ | Neovim: 0.8.0+*
+*Last Updated: 2025-12-22 | Plugin Version: 1.0.0 | Neovim: 0.8.0+*
