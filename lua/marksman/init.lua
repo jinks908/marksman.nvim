@@ -59,6 +59,30 @@ function M.setup(opts)
         end, 100)
     end
 
+    -- Track previous mark count per buffer
+    local mark_counts = {}
+
+    -- Update NV when marked lines are deleted/restored (n.b., only on write)
+    vim.api.nvim_create_autocmd('BufWritePost', {
+        group = vim.api.nvim_create_augroup('MarksmanRefresh', { clear = true }),
+        callback = function()
+            local bufnr = vim.api.nvim_get_current_buf()
+
+            -- Count marks if NV active
+            if night_vision.nv_state[bufnr] then
+                local current_marks = marks.get_marks()
+                local current_count = #current_marks
+                local previous_count = mark_counts[bufnr] or 0
+
+                -- Refresh if mark count changed (line deletion removed a mark)
+                if current_count ~= previous_count then
+                    night_vision.refresh()
+                    mark_counts[bufnr] = current_count
+                end
+            end
+        end
+    })
+
     -- Try to load telescope extension
     local has_telescope, telescope = pcall(require, 'telescope')
     if has_telescope then
