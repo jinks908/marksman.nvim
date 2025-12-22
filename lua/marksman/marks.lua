@@ -77,7 +77,6 @@ function M.get_marks()
     return marks_list
 end
 
--- #:# Get Free Mark (Helper Function)
 -- Function to get the first available mark
 local function get_first_available_mark()
     local used_marks = {}
@@ -100,7 +99,7 @@ local function get_first_available_mark()
     return nil
 end
 
--- #:# Set Manual Mark
+-- Set mark manually (using native 'm' command)
 M.set_mark = function(letter)
     local line_num = vim.api.nvim_win_get_cursor(0)[1]
 
@@ -120,7 +119,6 @@ M.set_mark = function(letter)
     end
 end
 
--- #:# Auto-Mark Function
 -- Function to auto-mark current line
 M.auto_mark = function()
     local free_mark = get_first_available_mark()
@@ -143,7 +141,6 @@ M.auto_mark = function()
     end
 end
 
--- #:# Jump to Next/Prev Mark
 -- Function to jump to next/previous mark
 M.next_mark = function(forward)
     local current_line = vim.fn.line('.')
@@ -188,7 +185,6 @@ M.next_mark = function(forward)
     end
 end
 
--- #:# Delete Mark
 -- Function to auto-delete mark on current line
 M.delete_mark = function()
     local current_line = vim.fn.line('.')
@@ -220,7 +216,7 @@ M.delete_mark = function()
     vim.notify(' No mark on current line', vim.log.levels.WARN, { title = " Marksman  " })
 end
 
--- #:# Delete Mark by Letter 
+-- Delete Mark by Letter 
 M.delete_by_letter = function(letter)
     local current_marks = M.get_marks()
     for i = 1, #current_marks do
@@ -241,7 +237,6 @@ M.delete_by_letter = function(letter)
     vim.notify(" Mark '" .. letter .. "' not set.", vim.log.levels.WARN, { title = " Marksman  " })
 end
 
--- #:# Delete All Marks
 -- Function to delete all local marks in current buffer
 M.delete_all_marks = function()
     -- Delete all lowercase (local) marks

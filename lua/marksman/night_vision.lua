@@ -111,7 +111,6 @@ function M.setup_highlights()
     vim.api.nvim_set_hl(0, 'NightVisionVirtualText', options.night_vision.highlights.virtual_text)
 end
 
--- #:# Update Virtual Text Based on Cursor Position
 -- Direct cursor tracking with per-line state management
 function M.update_virtual_text_for_cursor()
     local bufnr = vim.api.nvim_get_current_buf()
@@ -188,7 +187,7 @@ function M.update_virtual_text_for_cursor()
 end
 
 
--- #:# Toggle Night Vision
+-- Toggle Night Vision mode
 function M.toggle()
     local current_marks = marks.get_marks()
     local options = get_config_options()
@@ -269,7 +268,7 @@ function M.toggle()
     M.nv_state[bufnr] = not M.nv_state[bufnr]
 end
 
--- #:# Refresh Night Vision
+-- Refresh Night Vision
 function M.refresh()
     local current_marks = marks.get_marks()
     local options = get_config_options()
@@ -330,8 +329,6 @@ function M.refresh()
     M.nv_state[bufnr] = true
 end
 
--- #:# VT Toggle Functions
--- ## Show Line
 -- Replace virtual text icon when cursor moves off the line
 M.show_line = function(lnum)
     local bufnr = vim.api.nvim_get_current_buf()
@@ -345,7 +342,6 @@ M.show_line = function(lnum)
     refresh_all_virtual_text()
 end
 
--- ## Hide Line
 -- Hide virtual text icon when cursor is on the line
 M.hide_line = function(lnum)
     local bufnr = vim.api.nvim_get_current_buf()

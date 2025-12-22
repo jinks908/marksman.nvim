@@ -36,7 +36,6 @@ function M.marks(opts, mode)
     -- Override TelescopeSelection for Marksman picker
     vim.api.nvim_set_hl(0, 'TelescopeSelection', config.options.highlights.mark_selected)
 
-    -- ## Picker
     -- Get default/user config options
     opts = vim.tbl_deep_extend("force", config.options, opts or {})
     pickers.new(opts, {
@@ -90,7 +89,6 @@ function M.marks(opts, mode)
         sorter = conf.generic_sorter(opts),
         previewer = conf.grep_previewer({}),
 
-        -- ## Create Keymaps
         attach_mappings = function(prompt_bufnr, map)
 
             -- Helper function to determine if mark exists
@@ -137,7 +135,7 @@ function M.marks(opts, mode)
                 vim.keymap.set('n', key, function() goto_mark(key) end, { buffer = prompt_bufnr, noremap = true, silent = true })
             end
 
-            -- ## Standard Mappings
+            -- Standard Mappings
             local maps = {
                 n = {
                     ["<C-l>"] = function() actions.move_selection_next(prompt_bufnr) end,
