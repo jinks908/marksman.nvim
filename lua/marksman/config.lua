@@ -48,6 +48,9 @@ M.defaults = {
                 bg = "NONE",
             },
         },
+    },
+    keymaps = {
+        enabled = true,  -- Enable manual mark keymaps (ma, mb, ..., mz)
     }
 }
 

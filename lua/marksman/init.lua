@@ -98,6 +98,17 @@ function M.setup(opts)
         telescope.load_extension('marksman')
     end
 
+    -- Register manual mark keymaps (ma, mb, ..., mz) if enabled
+    if config.options.keymaps.enabled then
+        local opts = { noremap = true, silent = true }
+        for i = 97, 122 do
+            local key = string.char(i)
+            vim.keymap.set('n', 'm' .. key, function()
+                marks.set_mark(key)
+            end, opts)
+        end
+    end
+
     -- Export all public functions
     M.set_mark = marks.set_mark
     M.auto_mark = marks.auto_mark
