@@ -1,6 +1,6 @@
 # Marksman for Neovim
 
-![marksman_header](https://github.com/user-attachments/assets/e6743fb0-eb54-4789-a20f-d40b89a429e5)
+![marksman_header_2](https://github.com/user-attachments/assets/57625e07-2284-4155-b5bb-edd252e5f2cd)
 
 ## What is Marksman?
 
