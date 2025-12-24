@@ -37,7 +37,7 @@ local ns_id = vim.api.nvim_create_namespace('Marksman')
 local ns_id_vt = vim.api.nvim_create_namespace('MarksmanVT')
 
 -- Define the virtual text icon for Night Vision
-local nv_icon = '  '
+local nv_icon = ' '
 
 -- Buffer-specific sign tracking
 local buffer_signs = {}
