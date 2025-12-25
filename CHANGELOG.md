@@ -3,9 +3,9 @@
 ## [Unreleased] - [1.1.0] - 2025-12-25
 
 ### Added
-- [ ] Extra space after NV icon for better visibility
-- [ ] Enable/disable virtual text
-- [ ] Customize virtual text for Night Vision (i.e., "icon", "letter", "none")
+- Extra space after NV icon for better visibility
+- Enable/disable virtual text
+- Set custom virtual text for Night Vision
 
 
 ## [1.0.0] - 2025-12-22

@@ -276,7 +276,7 @@ function M.toggle()
         end
 
         -- Set up virtual text for all marked lines
-        if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
+        if options.night_vision.virtual_text and options.night_vision.virtual_text ~= "" then
             refresh_all_virtual_text()
         end
 
@@ -350,7 +350,7 @@ function M.refresh()
     M.nv_state[bufnr] = true
 
     -- Set up virtual text for all marked lines
-    if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
+    if options.night_vision.virtual_text and options.night_vision.virtual_text ~= "" then
         refresh_all_virtual_text()
     end
 end
@@ -446,7 +446,7 @@ local function apply_night_vision_to_buffer()
     end
 
     -- Set up virtual text for all marked lines
-    if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
+    if options.night_vision.virtual_text and options.night_vision.virtual_text ~= "" then
         refresh_all_virtual_text()
     end
 end
