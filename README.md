@@ -49,6 +49,12 @@ use {
 }
 ```
 
+### Using Vim-Plug
+```vim
+Plug 'nvim-telescope/telescope.nvim'
+Plug 'jinks908/marksman.nvim'
+```
+
 ## Basic Setup
 
 ```lua
@@ -57,7 +63,7 @@ require('marksman').setup({
         enabled = true,              -- Enable Night Vision on startup
         line_highlight = true,       -- Highlight line background
         line_nr_highlight = true,    -- Highlight line numbers
-        sign_column = "letter",      -- Show in gutter: "letter" (a-z), "icon" (◆), or "none"
+        sign_column = "letter",      -- Show in gutter: "letter" (mark a-z), custom character, or "none"
         sort_by = "line",            -- Sort by "line", "alphabetical", or "recency"
         silent = true,               -- Suppress mark operation notifications
     }
@@ -120,7 +126,7 @@ Open with `:Telescope marksman marks` or mapped key (e.g., `<C-m>`)
 - `<CR>` - Select and jump to highlighted mark
 - `<C-d>` - Delete selected mark
 - `<C-i>` - Switch to insert mode for filtering
-- `<C-k>/<C-l>` - Navigate marks (normal mode)
+- `<C-j>/<C-k>` - Navigate marks (normal mode)
 
 ## Configuration Options
 
@@ -131,7 +137,8 @@ night_vision = {
     enabled = true,                 -- Auto-enable on plugin load
     line_highlight = true,          -- Background color on marked lines
     line_nr_highlight = true,       -- Highlight line numbers
-    sign_column = "letter",         -- Show in gutter: "letter", "icon", "none"
+    sign_column = "letter",      -- Show in gutter: "letter" (mark a-z), custom character, or "none"
+    virtual_text = "  ",           -- Virtual text icon (set to "" to disable)
     sort_by = "line",               -- Sort marks: "line", "alphabetical", "recency"
     silent = true,                  -- Suppress mark operation notifications
     highlights = {
@@ -186,7 +193,7 @@ layout_config = {
 
 The plugin validates certain configuration values and will reset invalid values to defaults with an error notification:
 
-- **`sign_column`**: Must be one of `"letter"` (default), `"icon"`, or `"none"`
+- **`sign_column`**: Must be one of `"letter"` (default), `"none"`, or a single character string (e.g., `"*"`).
 - **`sort_by`**: Must be one of `"line"` (default), `"alphabetical"`, or `"recency"`
 
 Invalid values will trigger an error notification and reset to their defaults.
@@ -351,27 +358,55 @@ require('marksman').setup({
 ### Visual-Heavy Setup (Everything Highlighted)
 ```lua
 require('marksman').setup({
-    night_vision = {
-        enabled = true,
-        line_highlight = true,
-        line_nr_highlight = true,
-        sign_column = "letter",
-        sort_by = "recency",
+    layout_config = {
+        width = 0.95,
+        height = 0.5,
+        preview_width = 0.7,
     },
     highlights = {
-        line = { fg = "#ffffff", bg = "#ff0000", bold = true },
-        line_nr = { fg = "#ffff00", bg = "NONE", bold = true },
-        virtual_text = { fg = "#ffff00" },
-    }
-})
-```
-
-### Quiet Mode (No Notifications)
-```lua
-require('marksman').setup({
+        mark = {
+            fg = "#ffaf00",
+            bg = "NONE",
+            bold = true,
+        },
+        line_nr = {
+            fg = "#00aeff",
+            bg = "NONE",
+            bold = true,
+        },
+        mark_selected = {
+            fg = "NONE",
+            bg = "#2A314C",
+            bold = true,
+        },
+    },
     night_vision = {
-        silent = true
-    }
+        enabled = true,
+        line_highlight = false,
+        line_nr_highlight = true,
+        sign_column = "letter",
+        sort_by = "line",
+        virtual_text =  "  ",
+        silent = true,
+        highlights = {
+            line = {
+                fg = "#000000",
+                bg = "#5fd700",
+                bold = true,
+                italic = true,
+            },
+            line_nr = {
+                fg = "#5fd700",
+                bg = "NONE",
+                bold = true,
+            },
+            virtual_text = {
+                fg = "#5fd700",
+                bg = "NONE",
+                bold = true,
+            },
+        },
+    },
 })
 ```
 

@@ -94,12 +94,14 @@ function M.validate_config()
 
     if not valid_sign_options[options.night_vision.sign_column] then
         if #options.night_vision.sign_column > 1 then
+            ---@diagnostic disable-next-line: param-type-mismatch
             vim.notify({ 'Invalid sign_column option: "' .. options.night_vision.sign_column .. '"', 'Must be either: "none", "letter", or a single character', 'Defaulting to "letter"' }, vim.log.levels.ERROR, { timeout = 4000 })
             options.night_vision.sign_column = "letter"
             return false
         end
     end
     if not valid_sort_options[options.night_vision.sort_by] then
+        ---@diagnostic disable-next-line: param-type-mismatch
         vim.notify({ 'Invalid sort_by option: "' .. options.night_vision.sort_by .. '"', 'Must be: "line", "alphabetical", or "recency"', 'Defaulting to "line"' }, vim.log.levels.ERROR, { timeout = 4000 })
         options.night_vision.sort_by = "line"
         return false

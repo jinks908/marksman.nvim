@@ -168,7 +168,7 @@ end
 --- @return nil
 function M.cleanup_timestamp_files()
     local data_dir = get_data_dir()
-    local files = vim.fn.glob(data_dir .. '/*.json', false, 1)
+    local files = vim.fn.glob(data_dir .. '/*.json', false, true)
     local current_time = os.time()
 
     -- Handle glob returning empty result

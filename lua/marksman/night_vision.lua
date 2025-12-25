@@ -18,8 +18,6 @@
 --- Public API:
 ---   - toggle(): Toggle Night Vision on/off for current buffer
 ---   - refresh(): Refresh Night Vision display in current buffer
----   - hide_line(lnum): Hide Night Vision decorations on specific line
----   - show_line(lnum): Show Night Vision decorations on specific line
 ---   - update_virtual_text_for_cursor(): Update virtual text based on cursor position
 ---   - setup_highlights(): Configure highlight groups for Night Vision
 
@@ -57,11 +55,6 @@ local function is_valid_line(bufnr, lnum)
     end
     local line_count = vim.api.nvim_buf_line_count(bufnr)
     return lnum > 0 and lnum <= line_count
-end
-
--- Helper function to get unique sign name for buffer and mark
-local function get_sign_name(bufnr, mark)
-    return string.format('Marksman_%d_%s', bufnr, mark or 'base')
 end
 
 -- Helper function to clear buffer-specific signs
@@ -379,38 +372,6 @@ function M.refresh()
     end
 
     M.nv_state[bufnr] = true
-end
-
---- Hide Night Vision decorations on a specific line
---- Called internally when cursor moves onto a marked line
---- @param lnum number Line number to hide decorations on
---- @return nil
-M.hide_line = function(lnum)
-    local bufnr = vim.api.nvim_get_current_buf()
-
-    -- Validate line number before proceeding
-    if not is_valid_line(bufnr, lnum) then
-        return
-    end
-
-    -- Refresh all virtual text instead of just one line
-    refresh_all_virtual_text()
-end
-
---- Show Night Vision decorations on a specific line
---- Called internally when cursor moves away from a marked line
---- @param lnum number Line number to show decorations on
---- @return nil
-M.show_line = function(lnum)
-    local bufnr = vim.api.nvim_get_current_buf()
-
-    -- Validate line number before proceeding
-    if not is_valid_line(bufnr, lnum) then
-        return
-    end
-
-    -- Refresh all virtual text instead of just one line
-    refresh_all_virtual_text()
 end
 
 -- Function to apply Night Vision to current buffer (without toggling global state)

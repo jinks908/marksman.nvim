@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.0] - 2025-12-25
+
+### Changed
+- Refactored sign management to improve performance and maintainability
+- Revise README.md to reflect new features and changes
+
+### Removed
+- Unused `hide_line`/`show_line`/`get_sign_name` functions
+- Unused variables
+
+
 ## [1.1.2] - 2025-12-25
 
 ### Added

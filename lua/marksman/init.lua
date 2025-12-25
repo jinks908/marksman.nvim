@@ -16,8 +16,6 @@
 ---   - delete_all_marks(): Clear all marks in buffer
 ---   - night_vision(): Toggle Night Vision highlighting
 ---   - refresh(): Refresh Night Vision display
----   - hide_line(lnum): Hide Night Vision on specific line
----   - show_line(lnum): Show Night Vision on specific line
 ---   - version: Plugin version string
 ---   - min_nvim_version: Minimum required Neovim version
 
@@ -91,15 +89,11 @@ function M.setup(opts)
         end, 100)
     end
 
-    -- Track previous mark count per buffer
-    local mark_counts = {}
-
     -- Update NV when marked lines are deleted/restored (n.b., only on write)
     vim.api.nvim_create_autocmd('BufWritePost', {
         group = vim.api.nvim_create_augroup('MarksmanRefresh', { clear = true }),
         callback = function()
             local bufnr = vim.api.nvim_get_current_buf()
-            local night_vision = require('marksman.night_vision')
             if night_vision.nv_state[bufnr] then
                 night_vision.refresh()
             end
@@ -132,8 +126,6 @@ function M.setup(opts)
     M.delete_all_marks = marks.delete_all_marks
     M.night_vision = night_vision.toggle
     M.refresh = night_vision.refresh
-    M.hide_line = night_vision.hide_line
-    M.show_line = night_vision.show_line
 
     setup_done = true
 end
