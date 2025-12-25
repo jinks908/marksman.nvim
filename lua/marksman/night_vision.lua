@@ -263,7 +263,7 @@ function M.toggle()
                         })
                     buffer_signs[bufnr][extmark_id] = true
                 end
-                if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
+                if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             sign_text = mark.mark,
@@ -335,7 +335,7 @@ function M.refresh()
                     })
                 buffer_signs[bufnr][extmark_id] = true
             end
-            if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
+            if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
                 local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         sign_text = mark.mark,
@@ -433,7 +433,7 @@ local function apply_night_vision_to_buffer()
                     })
                 buffer_signs[bufnr][extmark_id] = true
             end
-            if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
+            if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
                 local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         sign_text = mark.mark,

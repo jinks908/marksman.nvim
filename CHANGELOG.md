@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+### Added
+- Set virtual text to mark letter
 
 
 ## [1.1.0] - 2025-12-25
