@@ -58,6 +58,7 @@ M.defaults = {
             virtual_text = {
                 fg = "#5fd700",
                 bg = "NONE",
+                bold = true,
             },
         },
     },

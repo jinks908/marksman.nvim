@@ -109,6 +109,10 @@ local function refresh_all_virtual_text()
                 virt_text_content = config.options.night_vision.virtual_text
             end
 
+            if config.options.night_vision.virtual_text == "letter" then
+                virt_text_content = mark.mark .. ' '
+            end
+
             local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
                 virt_text = {{virt_text_content, 'NightVisionVirtualText'}},
                 virt_text_pos = 'right_align',
@@ -196,6 +200,10 @@ function M.update_virtual_text_for_cursor()
                 pcall(vim.api.nvim_buf_del_extmark, bufnr, ns_id_vt, old_id)
             end
 
+            if config.options.night_vision.virtual_text == "letter" and not cursor_is_on then
+                virt_text_content = mark.mark .. ' '
+            end
+
             -- Set new extmark and store its ID
             local new_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
                 virt_text = {{virt_text_content, 'NightVisionVirtualText'}},
@@ -272,12 +280,11 @@ function M.toggle()
                         })
                     buffer_signs[bufnr][extmark_id] = true
                 end
+                -- Set up virtual text for all marked lines
+                if options.night_vision.virtual_text and options.night_vision.virtual_text ~= "" then
+                    refresh_all_virtual_text()
+                end
             end
-        end
-
-        -- Set up virtual text for all marked lines
-        if options.night_vision.virtual_text and options.night_vision.virtual_text ~= "" then
-            refresh_all_virtual_text()
         end
 
         if not options.night_vision.silent then
@@ -442,12 +449,11 @@ local function apply_night_vision_to_buffer()
                     })
                 buffer_signs[bufnr][extmark_id] = true
             end
+            -- Set up virtual text for all marked lines
+            if options.night_vision.virtual_text and options.night_vision.virtual_text ~= "" then
+                refresh_all_virtual_text()
+            end
         end
-    end
-
-    -- Set up virtual text for all marked lines
-    if options.night_vision.virtual_text and options.night_vision.virtual_text ~= "" then
-        refresh_all_virtual_text()
     end
 end
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.1.1] - 2025-12-25
 
 ### Added
 - Set virtual text to mark letter
