@@ -42,6 +42,7 @@ M.defaults = {
         line_highlight = true,
         line_nr_highlight = true,
         sign_column = "letter",
+        virtual_text =  "  ",
         sort_by = "line",
         silent = true,
         highlights = {

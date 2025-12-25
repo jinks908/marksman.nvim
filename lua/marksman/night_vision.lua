@@ -36,9 +36,6 @@ M.nv_state = {}
 local ns_id = vim.api.nvim_create_namespace('Marksman')
 local ns_id_vt = vim.api.nvim_create_namespace('MarksmanVT')
 
--- Define the virtual text icon for Night Vision
-local nv_icon = ' '
-
 -- Buffer-specific sign tracking
 local buffer_signs = {}
 
@@ -109,7 +106,7 @@ local function refresh_all_virtual_text()
             local cursor_is_on = (current_cursor == mark.lnum)
             -- Show icon when cursor is NOT on a marked line
             if not cursor_is_on then
-                virt_text_content = nv_icon
+                virt_text_content = config.options.night_vision.virtual_text
             end
 
             local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
@@ -191,7 +188,7 @@ function M.update_virtual_text_for_cursor()
 
         -- Only update if state changed
         if cursor_was_on ~= cursor_is_on then
-            local virt_text_content = cursor_is_on and '' or nv_icon
+            local virt_text_content = cursor_is_on and '' or config.options.night_vision.virtual_text
 
             -- Delete old extmark if it exists
             local old_id = vt_extmark_ids[bufnr][mark.lnum]
@@ -237,7 +234,7 @@ function M.toggle()
         if not options.night_vision.silent then
             vim.notify(' Night Vision off', vim.log.levels.INFO,
                 {
-                    title = " Marksman " .. nv_icon,
+                    title = " Marksman " .. config.options.night_vision.virtual_text,
                     timeout = 500
                 })
         end
@@ -266,7 +263,7 @@ function M.toggle()
                         })
                     buffer_signs[bufnr][extmark_id] = true
                 end
-                if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
+                if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             sign_text = mark.mark,
@@ -279,7 +276,7 @@ function M.toggle()
         end
 
         -- Set up virtual text for all marked lines
-        if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
+        if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
             refresh_all_virtual_text()
         end
 
@@ -287,7 +284,7 @@ function M.toggle()
             -- Notify user
             vim.notify(' Night Vision on', vim.log.levels.INFO,
                 {
-                    title = " Marksman " .. nv_icon,
+                    title = " Marksman " .. config.options.night_vision.virtual_text,
                     timeout = 500
                 })
         end
@@ -338,7 +335,7 @@ function M.refresh()
                     })
                 buffer_signs[bufnr][extmark_id] = true
             end
-            if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
+            if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
                 local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         sign_text = mark.mark,
@@ -353,7 +350,7 @@ function M.refresh()
     M.nv_state[bufnr] = true
 
     -- Set up virtual text for all marked lines
-    if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
+    if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
         refresh_all_virtual_text()
     end
 end
@@ -436,7 +433,7 @@ local function apply_night_vision_to_buffer()
                     })
                 buffer_signs[bufnr][extmark_id] = true
             end
-            if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
+            if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
                 local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         sign_text = mark.mark,
@@ -449,7 +446,7 @@ local function apply_night_vision_to_buffer()
     end
 
     -- Set up virtual text for all marked lines
-    if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
+    if options.night_vision.sign_column and options.night_vision.sign_column ~= "" then
         refresh_all_virtual_text()
     end
 end
