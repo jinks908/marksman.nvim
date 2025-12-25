@@ -87,14 +87,14 @@ local function refresh_all_virtual_text()
     local current_marks = marks.get_marks()
     local current_cursor = vim.api.nvim_win_get_cursor(0)[1]
 
-    -- Initialize VT extmark IDs for this buffer if needed
-    if not vt_extmark_ids[bufnr] then
-        vt_extmark_ids[bufnr] = {}
-    end
-
     -- Initialize cursor state for this buffer if needed
     if not cursor_on_marked_lines[bufnr] then
         cursor_on_marked_lines[bufnr] = {}
+    end
+
+    -- Initialize VT extmark IDs for this buffer if needed
+    if not vt_extmark_ids[bufnr] then
+        vt_extmark_ids[bufnr] = {}
     end
 
     -- Clear all virtual text for this buffer
@@ -350,12 +350,12 @@ function M.refresh()
         end
     end
 
+    M.nv_state[bufnr] = true
+
     -- Set up virtual text for all marked lines
     if options.night_vision.sign_column and options.night_vision.sign_column ~= "none" then
         refresh_all_virtual_text()
     end
-
-    M.nv_state[bufnr] = true
 end
 
 --- Hide Night Vision decorations on a specific line

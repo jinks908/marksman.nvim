@@ -99,18 +99,9 @@ function M.setup(opts)
         group = vim.api.nvim_create_augroup('MarksmanRefresh', { clear = true }),
         callback = function()
             local bufnr = vim.api.nvim_get_current_buf()
-
-            -- Count marks if NV active
+            local night_vision = require('marksman.night_vision')
             if night_vision.nv_state[bufnr] then
-                local current_marks = marks.get_marks()
-                local current_count = #current_marks
-                local previous_count = mark_counts[bufnr] or 0
-
-                -- Refresh if mark count changed (line deletion removed a mark)
-                if current_count ~= previous_count then
-                    night_vision.refresh()
-                    mark_counts[bufnr] = current_count
-                end
+                night_vision.refresh()
             end
         end
     })
