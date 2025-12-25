@@ -272,13 +272,23 @@ function M.toggle()
                     buffer_signs[bufnr][extmark_id] = true
                 end
                 if options.night_vision.sign_column ~= "none" then
-                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
-                        {
-                            sign_text = mark.mark,
-                            sign_hl_group = "NightVisionLineNr",
-                            priority = 5000
-                        })
-                    buffer_signs[bufnr][extmark_id] = true
+                    if options.night_vision.sign_column == "letter" then
+                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                            {
+                                sign_text = mark.mark,
+                                sign_hl_group = "NightVisionLineNr",
+                                priority = 5000
+                            })
+                        buffer_signs[bufnr][extmark_id] = true
+                    else
+                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                            {
+                                sign_text = options.night_vision.sign_column,
+                                sign_hl_group = "NightVisionLineNr",
+                                priority = 5000
+                            })
+                        buffer_signs[bufnr][extmark_id] = true
+                    end
                 end
                 -- Set up virtual text for all marked lines
                 if options.night_vision.virtual_text ~= "" then
@@ -343,23 +353,32 @@ function M.refresh()
                 buffer_signs[bufnr][extmark_id] = true
             end
             if options.night_vision.sign_column ~= "none" then
-                local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
-                    {
-                        sign_text = mark.mark,
-                        sign_hl_group = "NightVisionLineNr",
-                        priority = 5000
-                    })
-                buffer_signs[bufnr][extmark_id] = true
+                if options.night_vision.sign_column == "letter" then
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                        {
+                            sign_text = mark.mark,
+                            sign_hl_group = "NightVisionLineNr",
+                            priority = 5000
+                        })
+                    buffer_signs[bufnr][extmark_id] = true
+                else
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                        {
+                            sign_text = options.night_vision.sign_column,
+                            sign_hl_group = "NightVisionLineNr",
+                            priority = 5000
+                        })
+                    buffer_signs[bufnr][extmark_id] = true
+                end
+            end
+            -- Set up virtual text for all marked lines
+            if options.night_vision.virtual_text ~= "" then
+                refresh_all_virtual_text()
             end
         end
     end
 
     M.nv_state[bufnr] = true
-
-    -- Set up virtual text for all marked lines
-    if options.night_vision.virtual_text ~= "" then
-        refresh_all_virtual_text()
-    end
 end
 
 --- Hide Night Vision decorations on a specific line
@@ -441,13 +460,23 @@ local function apply_night_vision_to_buffer()
                 buffer_signs[bufnr][extmark_id] = true
             end
             if options.night_vision.sign_column ~= "none" then
-                local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
-                    {
-                        sign_text = mark.mark,
-                        sign_hl_group = "NightVisionLineNr",
-                        priority = 5000
-                    })
-                buffer_signs[bufnr][extmark_id] = true
+                if options.night_vision.sign_column == "letter" then
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                        {
+                            sign_text = mark.mark,
+                            sign_hl_group = "NightVisionLineNr",
+                            priority = 5000
+                        })
+                    buffer_signs[bufnr][extmark_id] = true
+                else
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                        {
+                            sign_text = options.night_vision.sign_column,
+                            sign_hl_group = "NightVisionLineNr",
+                            priority = 5000
+                        })
+                    buffer_signs[bufnr][extmark_id] = true
+                end
             end
             -- Set up virtual text for all marked lines
             if options.night_vision.virtual_text ~= "" then

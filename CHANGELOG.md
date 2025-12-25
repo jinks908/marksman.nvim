@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.2] - 2025-12-25
+
+### Added
+- Set custom sign column character/icon
+
+
 ## [1.1.1] - 2025-12-25
 
 ### Added
@@ -59,7 +65,8 @@
 
 ## Legend
 
-- **Added** - New features and functionality
+- **Feature** - New features and enhancements
+- **Added** - Small improvements and functionality
 - **Changed** - Changes to existing functionality
 - **Fixed** - Bug fixes and corrections
 - **Removed** - Removed features and code

@@ -69,7 +69,6 @@ M.defaults = {
 
 -- Store valid config options
 local valid_sign_options = {
-    icon = true,
     letter = true,
     none = true,
 }
@@ -94,9 +93,11 @@ function M.validate_config()
     local options = M.options or M.defaults
 
     if not valid_sign_options[options.night_vision.sign_column] then
-        vim.notify({ 'Invalid sign_column option: "' .. options.night_vision.sign_column .. '"', 'Must be either: "icon", "letter", or "none"', 'Defaulting to "icon"' }, vim.log.levels.ERROR, { timeout = 4000 })
-        options.night_vision.sign_column = "icon"
-        return false
+        if #options.night_vision.sign_column > 1 then
+            vim.notify({ 'Invalid sign_column option: "' .. options.night_vision.sign_column .. '"', 'Must be either: "none", "letter", or a single character', 'Defaulting to "letter"' }, vim.log.levels.ERROR, { timeout = 4000 })
+            options.night_vision.sign_column = "letter"
+            return false
+        end
     end
     if not valid_sort_options[options.night_vision.sort_by] then
         vim.notify({ 'Invalid sort_by option: "' .. options.night_vision.sort_by .. '"', 'Must be: "line", "alphabetical", or "recency"', 'Defaulting to "line"' }, vim.log.levels.ERROR, { timeout = 4000 })
