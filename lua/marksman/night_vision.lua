@@ -304,7 +304,7 @@ function M.toggle()
                             line_hl_group = "NightVision",
                         })
                     end
-                    if options.night_vision.line_nr_highlight then
+                    if options.night_vision.line_nr_highlight and not mark.builtin then
                         local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             number_hl_group = "NightVisionLineNr",
@@ -340,6 +340,7 @@ function M.toggle()
                         {
                             sign_text = mark.mark,
                             sign_hl_group = "BuiltinMark_" .. hl_type,
+                            number_hl_group = "BuiltinMark_" .. hl_type,
                             priority = 4000
                         })
                         buffer_signs[bufnr][extmark_id] = true
@@ -405,7 +406,7 @@ function M.refresh()
                         priority = 200
                     })
                 end
-                if options.night_vision.line_nr_highlight then
+                if options.night_vision.line_nr_highlight and not mark.builtin then
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         number_hl_group = "NightVisionLineNr",
@@ -441,6 +442,7 @@ function M.refresh()
                     {
                         sign_text = mark.mark,
                         sign_hl_group = "BuiltinMark_" .. hl_type,
+                        number_hl_group = "BuiltinMark_" .. hl_type,
                         priority = 4000
                     })
                     buffer_signs[bufnr][extmark_id] = true
@@ -499,7 +501,7 @@ local function apply_night_vision_to_buffer()
                         priority = 200
                     })
                 end
-                if options.night_vision.line_nr_highlight then
+                if options.night_vision.line_nr_highlight and not mark.builtin then
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         number_hl_group = "NightVisionLineNr",
@@ -535,6 +537,7 @@ local function apply_night_vision_to_buffer()
                     {
                         sign_text = mark.mark,
                         sign_hl_group = "BuiltinMark_" .. hl_type,
+                        number_hl_group = "BuiltinMark_" .. hl_type,
                         priority = 4000
                     })
                     buffer_signs[bufnr][extmark_id] = true
