@@ -113,6 +113,17 @@ function M.setup(opts)
         })
     end
 
+    -- Update NV when leaving Visual mode (for "<" and ">" marks)
+    vim.api.nvim_create_autocmd("ModeChanged", {
+        pattern = "[vV\x16]*:*",
+        callback = function()
+            local bufnr = vim.api.nvim_get_current_buf()
+            if night_vision.nv_state[bufnr] then
+                night_vision.refresh()
+            end
+        end,
+    })
+
     -- Try to load telescope extension
     local has_telescope, telescope = pcall(require, 'telescope')
     if has_telescope then
