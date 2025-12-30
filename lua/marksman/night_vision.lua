@@ -149,6 +149,7 @@ function M.setup_highlights()
     vim.api.nvim_set_hl(0, 'BuiltinMark_last_insert', options.builtin_marks.highlights.last_insert)
     vim.api.nvim_set_hl(0, 'BuiltinMark_visual_start', options.builtin_marks.highlights.visual_start)
     vim.api.nvim_set_hl(0, 'BuiltinMark_visual_end', options.builtin_marks.highlights.visual_end)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_jump_line', options.builtin_marks.highlights.last_jump_line)
     vim.api.nvim_set_hl(0, 'BuiltinMark_last_jump', options.builtin_marks.highlights.last_jump)
     vim.api.nvim_set_hl(0, 'BuiltinMark_last_exit', options.builtin_marks.highlights.last_exit)
 end

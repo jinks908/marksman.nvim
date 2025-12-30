@@ -41,12 +41,13 @@ M.defaults = {
         enabled = true,
         show_marks = { ".", "^", '"' },
         highlights = {
-            last_change = { fg = "#f7768e", bg = "NONE", bold = true },    -- . (red)
-            last_insert = { fg = "#ff875f", bg = "NONE", bold = true },    -- ^ (orange)
-            visual_start = { fg = "#a6e87d", bg = "NONE", bold = true },   -- < (green)
-            visual_end = { fg = "#a6e87d", bg = "NONE", bold = true },     -- > (green)
-            last_jump = { fg = "#53adf9", bg = "NONE", bold = true },      -- ' (blue)
-            last_exit = { fg = "#be86f7", bg = "NONE", bold = true },      -- " (purple)
+            last_change = { fg = "#f7768e", bg = "NONE", bold = true },
+            last_insert = { fg = "#ff875f", bg = "NONE", bold = true },
+            visual_start = { fg = "#a6e87d", bg = "NONE", bold = true },
+            visual_end = { fg = "#a6e87d", bg = "NONE", bold = true },
+            last_jump_line = { fg = "#53adf9", bg = "NONE", bold = true },
+            last_jump = { fg = "#53adf9", bg = "NONE", bold = true },
+            last_exit = { fg = "#be86f7", bg = "NONE", bold = true },
         }
     },
     night_vision = {

@@ -41,7 +41,8 @@ local function get_builtin_mark_type(mark)
         ["^"] = "last_insert",
         ["<"] = "visual_start",
         [">"] = "visual_end",
-        ["'"] = "last_jump",
+        ["'"] = "last_jump_line",
+        ["`"] = "last_jump",
         ['"'] = "last_exit",
     }
     return types[mark] or "unknown"
@@ -62,7 +63,14 @@ M.get_builtin_marks = function()
 
         -- Check if mark is in current buffer and valid
         if pos[1] == 0 and pos[2] > 0 then
-            local line_content = vim.api.nvim_buf_get_lines(0, pos[2]-1, pos[2], false)[1]
+            local line_content
+            if mark == "'" then
+                line_content = "[Last Jump (line)]"
+            elseif mark == "`" then
+                line_content = "[Last Jump]"
+            else
+                line_content = vim.api.nvim_buf_get_lines(0, pos[2]-1, pos[2], false)[1]
+            end
 
             table.insert(builtin_marks, {
                 mark = mark,
