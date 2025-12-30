@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.2] - 2025-12-30
+
+### Fixed
+- Real-time Night Vision refreshing when leaving Visual mode (for `<` and `>` signs)
+- nil value errors for `last_jump_line` / `last_jump` line content (set default text instead)
+
+### Changed
+- Refactor config options structure (merge highlight settings)
+
+
 ## [1.3.0] - 2025-12-30
 
 ### Added
