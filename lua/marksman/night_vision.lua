@@ -33,6 +33,7 @@ M.nv_state = {}
 -- Create new namespace
 local ns_id = vim.api.nvim_create_namespace('Marksman')
 local ns_id_vt = vim.api.nvim_create_namespace('MarksmanVT')
+local ns_id_builtin = vim.api.nvim_create_namespace('BuiltinMarks')
 
 -- Buffer-specific sign tracking
 local buffer_signs = {}
@@ -62,6 +63,7 @@ local function clear_buffer_signs(bufnr)
     if buffer_signs[bufnr] then
         for extmark_id, _ in pairs(buffer_signs[bufnr]) do
             pcall(vim.api.nvim_buf_del_extmark, bufnr, ns_id, extmark_id)
+            pcall(vim.api.nvim_buf_del_extmark, bufnr, ns_id_builtin, extmark_id)
         end
         buffer_signs[bufnr] = {}
     end
@@ -92,27 +94,42 @@ local function refresh_all_virtual_text()
     vt_extmark_ids[bufnr] = {}
 
     -- Re-add virtual text for all marked lines
+    local line_num = -1
     for _, mark in ipairs(current_marks) do
-        if is_valid_line(bufnr, mark.lnum) then
-            -- Hide icon when cursor is on a marked line
-            local virt_text_content = ''
-            local cursor_is_on = (current_cursor == mark.lnum)
-            -- Show icon when cursor is NOT on a marked line
-            if not cursor_is_on then
-                virt_text_content = config.options.night_vision.virtual_text
-            end
+        -- Avoid duplicate VT icons on same line
+        if mark.lnum ~= line_num then
+            line_num = mark.lnum
+            if is_valid_line(bufnr, mark.lnum) then
+                -- Hide icon when cursor is on a marked line
+                local virt_text_content = ''
+                local cursor_is_on = (current_cursor == mark.lnum)
+                -- Show icon when cursor is NOT on a marked line
+                if not cursor_is_on then
+                    virt_text_content = config.options.night_vision.virtual_text
+                end
 
-            if config.options.night_vision.virtual_text == "letter" then
-                virt_text_content = mark.mark .. ' '
-            end
+                if config.options.night_vision.virtual_text == "letter" then
+                    virt_text_content = mark.mark .. ' '
+                end
 
-            local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
-                virt_text = {{virt_text_content, 'NightVisionVirtualText'}},
-                virt_text_pos = 'right_align',
-            })
-            vt_extmark_ids[bufnr][mark.lnum] = extmark_id
-            -- Track the initial cursor state for this line
-            cursor_on_marked_lines[bufnr][mark.lnum] = cursor_is_on
+                -- Apply separate highlights for builtin marks
+                if mark.builtin then
+                    local hl_type = mark.type
+                    local hl = config.options.builtin_marks.highlights[hl_type]
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
+                        virt_text = {{virt_text_content, 'BuiltinMark_' .. hl_type}},
+                        virt_text_pos = 'right_align',
+                    })
+                    vt_extmark_ids[bufnr][mark.lnum] = extmark_id
+                else
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
+                        virt_text = {{virt_text_content, 'NightVisionVirtualText'}},
+                        virt_text_pos = 'right_align',
+                    })
+                    vt_extmark_ids[bufnr][mark.lnum] = extmark_id
+                end
+                cursor_on_marked_lines[bufnr][mark.lnum] = cursor_is_on
+            end
         end
     end
 end
@@ -127,6 +144,13 @@ function M.setup_highlights()
     vim.api.nvim_set_hl(0, 'NightVision', options.night_vision.highlights.line)
     vim.api.nvim_set_hl(0, 'NightVisionLineNr', options.night_vision.highlights.line_nr)
     vim.api.nvim_set_hl(0, 'NightVisionVirtualText', options.night_vision.highlights.virtual_text)
+
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_change', options.builtin_marks.highlights.last_change)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_insert', options.builtin_marks.highlights.last_insert)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_visual_start', options.builtin_marks.highlights.visual_start)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_visual_end', options.builtin_marks.highlights.visual_end)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_jump', options.builtin_marks.highlights.last_jump)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_exit', options.builtin_marks.highlights.last_exit)
 end
 
 --- Update virtual text decorations based on cursor position
@@ -175,6 +199,7 @@ function M.update_virtual_text_for_cursor()
     end
 
     -- Update virtual text for each marked line
+    local line_num = -1
     for _, mark in ipairs(current_marks) do
         if not is_valid_line(bufnr, mark.lnum) then
             goto continue
@@ -197,12 +222,27 @@ function M.update_virtual_text_for_cursor()
                 virt_text_content = mark.mark .. ' '
             end
 
-            -- Set new extmark and store its ID
-            local new_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
-                virt_text = {{virt_text_content, 'NightVisionVirtualText'}},
-                virt_text_pos = 'right_align',
-            })
-            vt_extmark_ids[bufnr][mark.lnum] = new_id
+            -- Avoid duplicate VT icons on same line
+            if mark.lnum ~= line_num then
+                line_num = mark.lnum
+                -- Apply separate highlights for builtin marks
+                if mark.builtin then
+                    local hl_type = mark.type
+                    local hl = config.options.builtin_marks.highlights[hl_type]
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
+                        virt_text = {{virt_text_content, 'BuiltinMark_' .. hl_type}},
+                        virt_text_pos = 'right_align',
+                    })
+                    vt_extmark_ids[bufnr][mark.lnum] = extmark_id
+                else
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
+                        virt_text = {{virt_text_content, 'NightVisionVirtualText'}},
+                        virt_text_pos = 'right_align',
+                    })
+                    vt_extmark_ids[bufnr][mark.lnum] = extmark_id
+                end
+            end
+            -- Track the initial cursor state for this line
             cursor_on_marked_lines[bufnr][mark.lnum] = cursor_is_on
         end
 
@@ -228,6 +268,7 @@ function M.toggle()
         -- Clear highlighting namespaces for this buffer only
         vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
         vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, 0, -1)
+        vim.api.nvim_buf_clear_namespace(bufnr, ns_id_builtin, 0, -1)
         -- Clear buffer-specific signs only
         clear_buffer_signs(bufnr)
         -- Clear mark_lines array
@@ -246,46 +287,65 @@ function M.toggle()
         -- Clear mark_lines array before repopulating
         M.mark_lines = {}
         -- Apply NightVision highlight groups
+        local line_num = -1
         for _, mark in ipairs(current_marks) do
             if is_valid_line(bufnr, mark.lnum) then
-                table.insert(M.mark_lines, mark.lnum)
-                if options.night_vision.line_highlight then
-                    -- Highlight marked lines
-                    vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                -- Avoid duplicate highlights on same line
+                if mark.lnum ~= line_num then
+                    line_num = mark.lnum
+                    table.insert(M.mark_lines, mark.lnum)
+                    if options.night_vision.line_highlight then
+                        -- Highlight marked lines
+                        vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             line_hl_group = "NightVision",
                         })
-                end
-                if options.night_vision.line_nr_highlight then
-                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                    end
+                    if options.night_vision.line_nr_highlight then
+                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             number_hl_group = "NightVisionLineNr",
                             priority = 5000
                         })
-                    buffer_signs[bufnr][extmark_id] = true
-                end
-                if options.night_vision.sign_column ~= "none" then
-                    if options.night_vision.sign_column == "letter" then
-                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                        buffer_signs[bufnr][extmark_id] = true
+                    end
+                    if options.night_vision.sign_column ~= "none" and not mark.builtin then
+                        if options.night_vision.sign_column == "letter" then
+                            local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                             {
                                 sign_text = mark.mark,
                                 sign_hl_group = "NightVisionLineNr",
                                 priority = 5000
                             })
-                        buffer_signs[bufnr][extmark_id] = true
-                    else
-                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                            buffer_signs[bufnr][extmark_id] = true
+                        else
+                            local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                             {
                                 sign_text = options.night_vision.sign_column,
                                 sign_hl_group = "NightVisionLineNr",
                                 priority = 5000
                             })
+                            buffer_signs[bufnr][extmark_id] = true
+                        end
+                    end
+                    -- Apply different highlights based on mark type
+                    if mark.builtin then
+                        local hl_type = mark.type
+                        local hl = config.options.builtin_marks.highlights[hl_type]
+
+                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
+                        {
+                            sign_text = mark.mark,
+                            sign_hl_group = "BuiltinMark_" .. hl_type,
+                            priority = 4000
+                        })
                         buffer_signs[bufnr][extmark_id] = true
                     end
-                end
-                -- Set up virtual text for all marked lines
-                if options.night_vision.virtual_text ~= "" then
-                    refresh_all_virtual_text()
+
+                    -- Set up virtual text for all marked lines
+                    if options.night_vision.virtual_text ~= "" then
+                        refresh_all_virtual_text()
+                    end
                 end
             end
         end
@@ -318,6 +378,7 @@ function M.refresh()
     -- Clear highlighting namespaces for this buffer only
     vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
     vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, 0, -1)
+    vim.api.nvim_buf_clear_namespace(bufnr, ns_id_builtin, 0, -1)
     -- Clear buffer-specific signs only
     clear_buffer_signs(bufnr)
 
@@ -326,47 +387,65 @@ function M.refresh()
 
     M.setup_highlights()
 
+    local line_num = -1
     for _, mark in ipairs(current_marks) do
         if is_valid_line(bufnr, mark.lnum) then
-            table.insert(M.mark_lines, mark.lnum)
-            if options.night_vision.line_highlight then
-                -- Highlight marked lines
-                vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+            -- Avoid duplicate highlights on same line
+            if mark.lnum ~= line_num then
+                line_num = mark.lnum
+                table.insert(M.mark_lines, mark.lnum)
+                if options.night_vision.line_highlight then
+                    -- Highlight marked lines
+                    vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         line_hl_group = "NightVision",
                         priority = 200
                     })
-            end
-            if options.night_vision.line_nr_highlight then
-                local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                end
+                if options.night_vision.line_nr_highlight then
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         number_hl_group = "NightVisionLineNr",
                         priority = 5000
                     })
-                buffer_signs[bufnr][extmark_id] = true
-            end
-            if options.night_vision.sign_column ~= "none" then
-                if options.night_vision.sign_column == "letter" then
-                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                    buffer_signs[bufnr][extmark_id] = true
+                end
+                if options.night_vision.sign_column ~= "none" and not mark.builtin then
+                    if options.night_vision.sign_column == "letter" then
+                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             sign_text = mark.mark,
                             sign_hl_group = "NightVisionLineNr",
                             priority = 5000
                         })
-                    buffer_signs[bufnr][extmark_id] = true
-                else
-                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                        buffer_signs[bufnr][extmark_id] = true
+                    else
+                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             sign_text = options.night_vision.sign_column,
                             sign_hl_group = "NightVisionLineNr",
                             priority = 5000
                         })
+                        buffer_signs[bufnr][extmark_id] = true
+                    end
+                end
+                -- Apply different highlights based on mark type
+                if mark.builtin then
+                    local hl_type = mark.type
+                    local hl = config.options.builtin_marks.highlights[hl_type]
+
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
+                    {
+                        sign_text = mark.mark,
+                        sign_hl_group = "BuiltinMark_" .. hl_type,
+                        priority = 4000
+                    })
                     buffer_signs[bufnr][extmark_id] = true
                 end
-            end
-            -- Set up virtual text for all marked lines
-            if options.night_vision.virtual_text ~= "" then
-                refresh_all_virtual_text()
+                -- Set up virtual text for all marked lines
+                if options.night_vision.virtual_text ~= "" then
+                    refresh_all_virtual_text()
+                end
             end
         end
     end
@@ -398,44 +477,63 @@ local function apply_night_vision_to_buffer()
     -- Clear existing highlights and signs for this buffer
     vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
     vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, 0, -1)
+    vim.api.nvim_buf_clear_namespace(bufnr, ns_id_builtin, 0, -1)
     clear_buffer_signs(bufnr)
 
     -- Apply highlights and signs to this buffer
     M.setup_highlights()
 
+    local line_num = -1
     for _, mark in ipairs(current_marks) do
         if is_valid_line(bufnr, mark.lnum) then
-            if options.night_vision.line_highlight then
-                vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+            -- Avoid duplicate highlights on same line
+            if mark.lnum ~= line_num then
+                line_num = mark.lnum
+                if options.night_vision.line_highlight then
+                    vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         line_hl_group = "NightVision",
                         priority = 200
                     })
-            end
-            if options.night_vision.line_nr_highlight then
-                local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                end
+                if options.night_vision.line_nr_highlight then
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         number_hl_group = "NightVisionLineNr",
                         priority = 5000
                     })
-                buffer_signs[bufnr][extmark_id] = true
-            end
-            if options.night_vision.sign_column ~= "none" then
-                if options.night_vision.sign_column == "letter" then
-                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                    buffer_signs[bufnr][extmark_id] = true
+                end
+                if options.night_vision.sign_column ~= "none" and not mark.builtin then
+                    if options.night_vision.sign_column == "letter" then
+                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             sign_text = mark.mark,
                             sign_hl_group = "NightVisionLineNr",
                             priority = 5000
                         })
-                    buffer_signs[bufnr][extmark_id] = true
-                else
-                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
+                        buffer_signs[bufnr][extmark_id] = true
+                    else
+                        local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             sign_text = options.night_vision.sign_column,
                             sign_hl_group = "NightVisionLineNr",
                             priority = 5000
                         })
+                        buffer_signs[bufnr][extmark_id] = true
+                    end
+                end
+                -- Apply different highlights based on mark type
+                if mark.builtin then
+                    local hl_type = mark.type
+                    local hl = config.options.builtin_marks.highlights[hl_type]
+
+                    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
+                    {
+                        sign_text = mark.mark,
+                        sign_hl_group = "BuiltinMark_" .. hl_type,
+                        priority = 4000
+                    })
                     buffer_signs[bufnr][extmark_id] = true
                 end
             end

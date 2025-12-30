@@ -100,6 +100,19 @@ function M.setup(opts)
         end
     })
 
+    -- Update NV when exiting Insert mode (for `^` marks)
+    if config.options.builtin_marks.enabled then
+        vim.api.nvim_create_autocmd('InsertLeave', {
+            group = vim.api.nvim_create_augroup('MarksmanInsertLeave', { clear = true }),
+            callback = function()
+                local bufnr = vim.api.nvim_get_current_buf()
+                if night_vision.nv_state[bufnr] then
+                    night_vision.refresh()
+                end
+            end
+        })
+    end
+
     -- Try to load telescope extension
     local has_telescope, telescope = pcall(require, 'telescope')
     if has_telescope then

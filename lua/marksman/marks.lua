@@ -35,6 +35,54 @@ local function get_config_options()
     return config.options or config.defaults
 end
 
+local function get_builtin_mark_type(mark)
+    local types = {
+        ["."] = "last_change",
+        ["^"] = "last_insert",
+        ["<"] = "visual_start",
+        [">"] = "visual_end",
+        ["'"] = "last_jump",
+        ['"'] = "last_exit",
+    }
+    return types[mark] or "unknown"
+end
+
+-- Helper function to get builtin marks
+M.get_builtin_marks = function()
+    if not config.options.builtin_marks.enabled then
+        return {}
+    end
+
+    local builtin_marks = {}
+    -- Only get configured builtin marks
+    local show_marks = config.options.builtin_marks.show_marks
+
+    for _, mark in ipairs(show_marks) do
+        local pos = vim.fn.getpos("'" .. mark)
+
+        -- Check if mark is in current buffer and valid
+        if pos[1] == 0 and pos[2] > 0 then
+            local line_content = vim.api.nvim_buf_get_lines(0, pos[2]-1, pos[2], false)[1]
+
+            table.insert(builtin_marks, {
+                mark = mark,
+                lnum = pos[2],
+                display = line_content:gsub('^%s*', ''),
+                builtin = true,
+                type = get_builtin_mark_type(mark)
+            })
+        end
+    end
+
+    -- Sort (builtin marks would appear in position order)
+    table.sort(builtin_marks, function(a, b)
+        return a.lnum < b.lnum
+    end)
+
+    return builtin_marks
+end
+
+
 --- Get all marks in current buffer with metadata
 --- Returns marks sorted by configured method (line, alphabetical, or recency)
 --- @return table List of marks with structure: {mark=letter, lnum=number, display=string, timestamp=number}
@@ -61,14 +109,22 @@ function M.get_marks()
                 -- Get the content of the line
                 line_content = vim.api.nvim_buf_get_lines(bufnr, mark.pos[2]-1, mark.pos[2], false)[1]
                 table.insert(marks_list, {
-                        -- Extract letter only
-                        mark = mark.mark:sub(2),
-                        lnum = mark.pos[2],
-                        -- Strip leading whitespace for marked line
-                        display = line_content:gsub('^%s*', ''),
-                        timestamp = data.get_timestamp(mark.mark:sub(2)) or 0,
-                    })
+                    -- Extract letter only
+                    mark = mark.mark:sub(2),
+                    lnum = mark.pos[2],
+                    -- Strip leading whitespace for marked line
+                    display = line_content:gsub('^%s*', ''),
+                    timestamp = data.get_timestamp(mark.mark:sub(2)) or 0,
+                })
             end
+        end
+    end
+
+    -- Add builtin marks if enabled
+    if config.options.builtin_marks.enabled then
+        local builtin = M.get_builtin_marks()
+        for _, mark in ipairs(builtin) do
+            table.insert(marks_list, mark)
         end
     end
 

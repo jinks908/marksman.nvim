@@ -37,6 +37,18 @@ M.defaults = {
         height = 0.5,
         preview_width = 0.5,
     },
+    builtin_marks = {
+        enabled = true,
+        show_marks = { ".", "^", '"' },
+        highlights = {
+            last_change = { fg = "#f7768e", bg = "NONE", bold = true },    -- . (red)
+            last_insert = { fg = "#ff875f", bg = "NONE", bold = true },    -- ^ (orange)
+            visual_start = { fg = "#a6e87d", bg = "NONE", bold = true },   -- < (green)
+            visual_end = { fg = "#a6e87d", bg = "NONE", bold = true },     -- > (green)
+            last_jump = { fg = "#53adf9", bg = "NONE", bold = true },      -- ' (blue)
+            last_exit = { fg = "#be86f7", bg = "NONE", bold = true },      -- " (purple)
+        }
+    },
     night_vision = {
         enabled = true,
         line_highlight = true,
