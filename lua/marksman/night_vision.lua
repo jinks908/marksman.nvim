@@ -115,7 +115,7 @@ local function refresh_all_virtual_text()
                 -- Apply separate highlights for builtin marks
                 if mark.builtin then
                     local hl_type = mark.type
-                    local hl = config.options.builtin_marks.highlights[hl_type]
+                    local hl = config.options.night_vision.highlights[hl_type]
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
                         virt_text = {{virt_text_content, 'BuiltinMark_' .. hl_type}},
                         virt_text_pos = 'right_align',
@@ -138,6 +138,7 @@ end
 --- @return nil
 function M.setup_highlights()
     local options = get_config_options()
+    -- Normal mark highlights
     vim.api.nvim_set_hl(0, 'MarksmanMark', options.highlights.mark)
     vim.api.nvim_set_hl(0, 'MarksmanMarkSelected', options.highlights.mark_selected)
     vim.api.nvim_set_hl(0, 'MarksmanLine', options.highlights.line_nr)
@@ -145,13 +146,14 @@ function M.setup_highlights()
     vim.api.nvim_set_hl(0, 'NightVisionLineNr', options.night_vision.highlights.line_nr)
     vim.api.nvim_set_hl(0, 'NightVisionVirtualText', options.night_vision.highlights.virtual_text)
 
-    vim.api.nvim_set_hl(0, 'BuiltinMark_last_change', options.builtin_marks.highlights.last_change)
-    vim.api.nvim_set_hl(0, 'BuiltinMark_last_insert', options.builtin_marks.highlights.last_insert)
-    vim.api.nvim_set_hl(0, 'BuiltinMark_visual_start', options.builtin_marks.highlights.visual_start)
-    vim.api.nvim_set_hl(0, 'BuiltinMark_visual_end', options.builtin_marks.highlights.visual_end)
-    vim.api.nvim_set_hl(0, 'BuiltinMark_last_jump_line', options.builtin_marks.highlights.last_jump_line)
-    vim.api.nvim_set_hl(0, 'BuiltinMark_last_jump', options.builtin_marks.highlights.last_jump)
-    vim.api.nvim_set_hl(0, 'BuiltinMark_last_exit', options.builtin_marks.highlights.last_exit)
+    -- Builtin mark highlights
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_change', options.night_vision.highlights.last_change)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_insert', options.night_vision.highlights.last_insert)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_visual_start', options.night_vision.highlights.visual_start)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_visual_end', options.night_vision.highlights.visual_end)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_jump_line', options.night_vision.highlights.last_jump_line)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_jump', options.night_vision.highlights.last_jump)
+    vim.api.nvim_set_hl(0, 'BuiltinMark_last_exit', options.night_vision.highlights.last_exit)
 end
 
 --- Update virtual text decorations based on cursor position
@@ -229,7 +231,7 @@ function M.update_virtual_text_for_cursor()
                 -- Apply separate highlights for builtin marks
                 if mark.builtin then
                     local hl_type = mark.type
-                    local hl = config.options.builtin_marks.highlights[hl_type]
+                    local hl = config.options.night_vision.highlights[hl_type]
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_vt, mark.lnum - 1, 0, {
                         virt_text = {{virt_text_content, 'BuiltinMark_' .. hl_type}},
                         virt_text_pos = 'right_align',
@@ -332,7 +334,7 @@ function M.toggle()
                     -- Apply different highlights based on mark type
                     if mark.builtin then
                         local hl_type = mark.type
-                        local hl = config.options.builtin_marks.highlights[hl_type]
+                        local hl = config.options.night_vision.highlights[hl_type]
 
                         local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
                         {
@@ -433,7 +435,7 @@ function M.refresh()
                 -- Apply different highlights based on mark type
                 if mark.builtin then
                     local hl_type = mark.type
-                    local hl = config.options.builtin_marks.highlights[hl_type]
+                    local hl = config.options.night_vision.highlights[hl_type]
 
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
                     {
@@ -527,7 +529,7 @@ local function apply_night_vision_to_buffer()
                 -- Apply different highlights based on mark type
                 if mark.builtin then
                     local hl_type = mark.type
-                    local hl = config.options.builtin_marks.highlights[hl_type]
+                    local hl = config.options.night_vision.highlights[hl_type]
 
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
                     {

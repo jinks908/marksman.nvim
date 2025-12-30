@@ -15,6 +15,7 @@ local M = {}
 
 -- Default Config
 M.defaults = {
+    -- Highlights for Telescope picker
     highlights = {
         mark = {
             fg = "#00aeff",
@@ -32,24 +33,18 @@ M.defaults = {
             bold = true,
         },
     },
+    -- Telescope layout configuration
     layout_config = {
         width = 0.9,
         height = 0.5,
         preview_width = 0.5,
     },
+    -- Use Neovim's builtin marks
     builtin_marks = {
         enabled = true,
         show_marks = { ".", "^", '"' },
-        highlights = {
-            last_change = { fg = "#f7768e", bg = "NONE", bold = true },
-            last_insert = { fg = "#ff875f", bg = "NONE", bold = true },
-            visual_start = { fg = "#a6e87d", bg = "NONE", bold = true },
-            visual_end = { fg = "#a6e87d", bg = "NONE", bold = true },
-            last_jump_line = { fg = "#53adf9", bg = "NONE", bold = true },
-            last_jump = { fg = "#53adf9", bg = "NONE", bold = true },
-            last_exit = { fg = "#be86f7", bg = "NONE", bold = true },
-        }
     },
+    -- Night Vision configuration and highlights
     night_vision = {
         enabled = true,
         line_highlight = true,
@@ -59,20 +54,16 @@ M.defaults = {
         sort_by = "line",
         silent = true,
         highlights = {
-            line = {
-                fg = "#000000",
-                bg = "#5fd700",
-            },
-            line_nr = {
-                fg = "#5fd700",
-                bg = "NONE",
-                bold = true,
-            },
-            virtual_text = {
-                fg = "#5fd700",
-                bg = "NONE",
-                bold = true,
-            },
+            line = { fg = "#000000", bg = "#5fd700", },
+            line_nr = { fg = "#5fd700", bg = "NONE", bold = true, },
+            virtual_text = { fg = "#5fd700", bg = "NONE", bold = true, },
+            last_change = { fg = "#f7768e", bg = "NONE", bold = true },
+            last_insert = { fg = "#ff875f", bg = "NONE", bold = true },
+            visual_start = { fg = "#a6e87d", bg = "NONE", bold = true },
+            visual_end = { fg = "#a6e87d", bg = "NONE", bold = true },
+            last_jump_line = { fg = "#53adf9", bg = "NONE", bold = true },
+            last_jump = { fg = "#53adf9", bg = "NONE", bold = true },
+            last_exit = { fg = "#be86f7", bg = "NONE", bold = true },
         },
     },
     keymaps = {

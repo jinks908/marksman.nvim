@@ -50,7 +50,7 @@ end
 
 -- Helper function to get builtin marks
 M.get_builtin_marks = function()
-    if not config.options.builtin_marks.enabled then
+    if not config.options.night_vision.enabled then
         return {}
     end
 
@@ -129,7 +129,7 @@ function M.get_marks()
     end
 
     -- Add builtin marks if enabled
-    if config.options.builtin_marks.enabled then
+    if config.options.night_vision.enabled then
         local builtin = M.get_builtin_marks()
         for _, mark in ipairs(builtin) do
             table.insert(marks_list, mark)
