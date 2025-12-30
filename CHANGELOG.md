@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.3] - 2025-12-30
+
+### Added
+- Separate highlights for builtin marks in Telescope picker
+
+
 ## [1.3.2] - 2025-12-30
 
 ### Fixed

@@ -54,7 +54,7 @@ function M.marks(opts, mode)
                 end
                 local lnum_width = #tostring(max_lnum)
 
-                -- Create display string with highlighting
+                -- Set display widths
                 local displayer = require("telescope.pickers.entry_display").create({
                     separator = " ",
                     items = {
@@ -64,11 +64,22 @@ function M.marks(opts, mode)
                     },
                 })
 
-                -- Set custom highlighting
+                -- Format display entries
                 local make_display = function(entry_tb)
+                    local mark_hl, lnum_hl
+
+                    -- Determine highlight groups based on mark type
+                    if entry_tb.value.builtin then
+                        mark_hl = "BuiltinMark_" .. entry_tb.value.type
+                        lnum_hl = "BuiltinMark_" .. entry_tb.value.type
+                    else
+                        mark_hl = "MarksmanMark"
+                        lnum_hl = "MarksmanLine"
+                    end
+
                     return displayer({
-                        { entry_tb.value.mark, "MarksmanMark" },
-                        { tostring(entry_tb.value.lnum), "MarksmanLine" },
+                        { entry_tb.value.mark, mark_hl },
+                        { tostring(entry_tb.value.lnum), lnum_hl },
                         entry_tb.value.display,
                     })
                 end
