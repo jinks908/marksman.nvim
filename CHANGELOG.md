@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0] - 2025-12-30
+
+### Added
+- Support for Neovim's builtin marks (i.e., `. ^ ' " < > [ ]`)
+    - Option to enable/disable
+    - Set custom Night Vision highlights for builtin marks
+
+
 ## [1.2.0] - 2025-12-25
 
 ### Changed
