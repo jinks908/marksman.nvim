@@ -51,8 +51,8 @@ M.defaults = {
         show_virtual_text = {
             last_change = " ",
             last_insert = " ",
-            visual_start = " ",
-            visual_end = " ",
+            visual_start = "󰬩 ",
+            visual_end = "󰬫 ",
         },
     },
     -- Night Vision configuration and highlights
