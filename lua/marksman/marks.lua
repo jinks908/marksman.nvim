@@ -228,6 +228,21 @@ M.auto_mark = function()
     end
 end
 
+-- Toggle mark on current line
+--- @return nil
+M.toggle_mark = function()
+    local line = vim.fn.line('.')
+    local marks = M.get_marks()
+
+    for _, mark in ipairs(marks) do
+        if mark.lnum == line then
+            M.delete_mark()
+            return
+        end
+    end
+    M.auto_mark()
+end
+
 --- Jump to next or previous mark in current buffer
 --- Wraps around at edges (loops from last to first or vice versa)
 --- @param forward boolean true to jump forward, false to jump backward

@@ -144,6 +144,7 @@ function M.setup(opts)
     -- Export all public functions
     M.set_mark = marks.set_mark
     M.auto_mark = marks.auto_mark
+    M.toggle_mark = marks.toggle_mark
     M.next_mark = marks.next_mark
     M.delete_mark = marks.delete_mark
     M.delete_by_letter = marks.delete_by_letter
