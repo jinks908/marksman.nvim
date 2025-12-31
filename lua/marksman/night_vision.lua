@@ -1,25 +1,24 @@
 --- lua/marksman/night_vision.lua
 ---
---- Night Vision visual feedback module for Marksman plugin
+--- Night Vision visual feedback module for Marksman
 ---
 --- Handles real-time visual highlighting of marked lines:
 ---   - Line background highlighting
 ---   - Line number highlighting
 ---   - Mark letters/icons in the gutter
----   - Decorative virtual text icons (smart icon toggling based on cursor position)
+---   - Virtual text icons
 ---
 --- Features:
----   - Per-buffer state management (independent Night Vision per window)
+---   - Per-buffer state management (independent Night Vision per document)
 ---   - Smart icon toggling: icons hide when cursor on line, show when away
 ---   - Smooth updates on cursor movement
 ---   - Automatic application to new buffers
----   - Clean removal of signs when toggling off
 ---
 --- Public API:
+---   - setup_highlights(): Configure highlight groups for Night Vision
+---   - update_virtual_text_for_cursor(): Update virtual text based on cursor position
 ---   - toggle(): Toggle Night Vision on/off for current buffer
 ---   - refresh(): Refresh Night Vision display in current buffer
----   - update_virtual_text_for_cursor(): Update virtual text based on cursor position
----   - setup_highlights(): Configure highlight groups for Night Vision
 
 local M = {}
 local config = require('marksman.config')
@@ -372,7 +371,7 @@ function M.toggle()
 end
 
 --- Refresh Night Vision display in current buffer
---- Reapplies all marks, highlights, and decorations
+--- Reapplies all marks, highlights, signs, and virtual text
 --- @return nil
 function M.refresh()
     local current_marks = marks.get_marks()
@@ -464,6 +463,7 @@ function M.refresh()
 end
 
 -- Function to apply Night Vision to current buffer (without toggling global state)
+--- @return nil
 local function apply_night_vision_to_buffer()
     local current_marks = marks.get_marks()
     local options = get_config_options()

@@ -1,17 +1,18 @@
 --- lua/marksman/marks.lua
 ---
---- Mark management module for Marksman plugin
+--- Mark management module for Marksman
 ---
 --- Handles all mark-related operations including:
 ---   - Setting and deleting marks (a-z)
 ---   - Retrieving marks with metadata (line number, content, timestamp)
 ---   - Sorting marks by different criteria (line, alphabetical, recency)
 ---   - Integrating with Night Vision visual feedback
----   - Notifying user on mark operations
+---   - Notifying user on mark operations (optional)
 ---
 --- Public API:
 ---   - set_mark(letter): Set mark at current cursor position
 ---   - auto_mark(): Auto-assign next available mark letter (a-z)
+---   - toggle_mark(): Toggle mark on current line (auto-set/delete)
 ---   - next_mark(forward): Jump to next or previous mark
 ---   - delete_mark(): Delete mark on current line
 ---   - delete_by_letter(letter): Delete specific mark by letter
@@ -22,10 +23,10 @@ local M = {}
 local config = require('marksman.config')
 local data = require('marksman.data')
 
--- Instead of requiring night_vision, we'll use a reference to it
+-- Reference to night_vision module
 local night_vision
 
--- Add an init function that gets called after all modules are loaded
+-- init() gets called after modules are loaded
 function M.init()
     night_vision = require('marksman.night_vision')
 end
@@ -35,6 +36,7 @@ local function get_config_options()
     return config.options or config.defaults
 end
 
+-- Helper function to map builtin mark types to native symbols
 local function get_builtin_mark_type(mark)
     local types = {
         ["last_change"] = ".",
@@ -49,6 +51,7 @@ local function get_builtin_mark_type(mark)
 end
 
 -- Helper function to get builtin marks
+--- @return table List of marks with structure: {mark=symbol, sign=icon, lnum=number, display=string, builtin=boolean, type=string}
 M.get_builtin_marks = function()
     if not config.options.night_vision.enabled then
         return {}
@@ -124,7 +127,7 @@ function M.get_marks()
     end
 
     -- Add builtin marks if enabled
-    if config.options.night_vision.enabled then
+    if config.options.builtin_marks.enabled then
         local builtin = M.get_builtin_marks()
         for _, mark in ipairs(builtin) do
             table.insert(marks_list, mark)
@@ -180,6 +183,9 @@ end
 --- Set a mark at the current cursor position
 --- @param letter string Single lowercase letter (a-z) to use as mark
 --- @return nil
+--- @see auto_mark to auto-assign mark to current line
+--- @see delete_mark to remove mark from current line
+--- @see toggle_mark to toggle mark on current line
 M.set_mark = function(letter)
     local line_num = vim.api.nvim_win_get_cursor(0)[1]
 
@@ -202,6 +208,9 @@ end
 --- Auto-assign the next available mark letter at current cursor position
 --- Searches for first unused letter from a-z
 --- @return nil
+--- @see set_mark to set mark from current line
+--- @see auto_mark to auto-assign mark to current line
+--- @see toggle_mark to toggle mark on current line
 M.auto_mark = function()
     local free_mark = get_first_available_mark()
     local line_num = vim.api.nvim_win_get_cursor(0)[1]
@@ -225,6 +234,9 @@ end
 
 -- Toggle mark on current line
 --- @return nil
+--- @see set_mark to set mark from current line
+--- @see delete_mark to delete mark on current line
+--- @see auto_mark to auto-assign mark to current line
 M.toggle_mark = function()
     local line = vim.fn.line('.')
     local marks = M.get_marks()
@@ -287,6 +299,9 @@ end
 
 --- Delete the mark on the current line
 --- @return nil
+--- @see set_mark to set mark from current line
+--- @see auto_mark to auto-assign mark to current line
+--- @see toggle_mark to toggle mark on current line
 M.delete_mark = function()
     local current_line = vim.fn.line('.')
     local current_marks = M.get_marks()

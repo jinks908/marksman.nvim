@@ -77,8 +77,16 @@ M.defaults = {
             last_exit = { fg = "#be86f7", bg = "NONE", bold = true },
         },
     },
+    -- Leave empty to disable keymap
     keymaps = {
-        enabled = true,  -- Enable manual mark keymaps (ma, mb, ..., mz)
+        open_picker = "<leader>mp",
+        next_mark = "<]m>",
+        prev_mark = "<[m>",
+        toggle_mark = "<leader>m",
+        delete_all_marks = "<leader>dam",
+        toggle_night_vision = "<leader>nv",
+        set_manual_marks = true,  -- Set marks manually (ma, mb, ..., mz)
+        del_manual_marks = true,  -- Delete marks manually (dma, dmb, ..., dmz)
     }
 }
 

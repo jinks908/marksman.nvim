@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0] - 2025-12-31
+
+### Added
+- Create configs for default Marksman keymaps
+- Enable manual keymaps for setting/deleting marks (i.e., `ma`/`dma`, `mb`/`dmb`, etc.) by default
+
+
 ## [1.3.4] - 2025-12-31
 
 ### Added

@@ -50,6 +50,7 @@ function M.setup(opts)
     local night_vision = require('marksman.night_vision')
     local marks = require('marksman.marks')
 
+    -- Initialize marks module
     marks.init()
 
     -- Require data module once at setup
@@ -74,7 +75,6 @@ function M.setup(opts)
     })
 
     -- Set up the autocommand for direct cursor tracking with per-line state
-    -- This replaces the debounce approach with immediate, per-line state updates
     vim.api.nvim_create_autocmd({'CursorMovedI', 'CursorMoved'}, {
         group = vim.api.nvim_create_augroup('MarksmanCursor', { clear = true }),
         callback = function()
@@ -130,14 +130,40 @@ function M.setup(opts)
         telescope.load_extension('marksman')
     end
 
-    -- Register manual mark keymaps (ma, mb, ..., mz) if enabled
-    if config.options.keymaps.enabled then
-        local opts = { noremap = true, silent = true }
+    -- Check for configured keymaps
+    local function set_keymap(key, action)
+        if key and key ~= '' then
+            vim.keymap.set('n', key, action, default_opts)
+        end
+    end
+
+    -- Set keymaps
+    local km = config.options.keymaps
+    local default_opts = { noremap = true, silent = true }
+    set_keymap(km.open_picker, '<cmd>Telescope marksman marks<CR>')
+    set_keymap(km.next_mark, function() marks.next_mark(true) end)
+    set_keymap(km.prev_mark, function() marks.next_mark(false) end)
+    set_keymap(km.toggle_mark, marks.toggle_mark)
+    set_keymap(km.delete_all_marks, marks.delete_all_marks)
+    set_keymap(km.toggle_night_vision, night_vision.toggle)
+
+    -- Manually set mark keymaps (ma, mb, ..., mz) if enabled
+    if config.options.keymaps.set_manual_marks then
         for i = 97, 122 do
             local key = string.char(i)
             vim.keymap.set('n', 'm' .. key, function()
                 marks.set_mark(key)
-            end, opts)
+            end, default_opts)
+        end
+    end
+
+    -- Manually delete mark keymaps (dma, dmb, ..., dmz) if enabled
+    if config.options.keymaps.del_manual_marks then
+        for i = 97, 122 do
+            local key = string.char(i)
+            vim.keymap.set('n', 'dm' .. key, function()
+                marks.delete_by_letter(key)
+            end, default_opts)
         end
     end
 
