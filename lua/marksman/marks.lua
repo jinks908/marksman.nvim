@@ -37,13 +37,13 @@ end
 
 local function get_builtin_mark_type(mark)
     local types = {
-        ["."] = "last_change",
-        ["^"] = "last_insert",
-        ["<"] = "visual_start",
-        [">"] = "visual_end",
-        ["'"] = "last_jump_line",
-        ["`"] = "last_jump",
-        ['"'] = "last_exit",
+        ["last_change"] = ".",
+        ["last_insert"] = "^",
+        ["visual_start"] = "<",
+        ["visual_end"] = ">",
+        ["last_jump_line"] = "'",
+        ["last_jump"] = "`",
+        ["last_exit"] = '"',
     }
     return types[mark] or "unknown"
 end
@@ -55,29 +55,24 @@ M.get_builtin_marks = function()
     end
 
     local builtin_marks = {}
-    -- Only get configured builtin marks
-    local show_marks = config.options.builtin_marks.show_marks
+    -- Get enabled marks
+    local show_signs = config.options.builtin_marks.show_signs
 
-    for _, mark in ipairs(show_marks) do
-        local pos = vim.fn.getpos("'" .. mark)
-
+    for type, sign in pairs(show_signs) do
+        local symbol = get_builtin_mark_type(type)
+        local pos = vim.fn.getpos("'" .. symbol)
         -- Check if mark is in current buffer and valid
         if pos[1] == 0 and pos[2] > 0 then
-            local line_content
-            if mark == "'" then
-                line_content = "[Last Jump (line)]"
-            elseif mark == "`" then
-                line_content = "[Last Jump]"
-            else
-                line_content = vim.api.nvim_buf_get_lines(0, pos[2]-1, pos[2], false)[1]
-            end
+            local line_content = vim.api.nvim_buf_get_lines(0, pos[2]-1, pos[2], false)[1] or tostring(type)
 
             table.insert(builtin_marks, {
-                mark = mark,
+                -- NOTE: Use 'symbol' as mark identifier and 'sign' for custom display
+                mark = symbol,
+                sign = sign,
                 lnum = pos[2],
                 display = line_content:gsub('^%s*', ''),
                 builtin = true,
-                type = get_builtin_mark_type(mark)
+                type = type
             })
         end
     end

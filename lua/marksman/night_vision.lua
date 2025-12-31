@@ -105,11 +105,13 @@ local function refresh_all_virtual_text()
                 local cursor_is_on = (current_cursor == mark.lnum)
                 -- Show icon when cursor is NOT on a marked line
                 if not cursor_is_on then
-                    virt_text_content = config.options.night_vision.virtual_text
-                end
-
-                if config.options.night_vision.virtual_text == "letter" then
-                    virt_text_content = mark.mark .. ' '
+                    if mark.builtin then
+                        virt_text_content = config.options.builtin_marks.show_virtual_text[mark.type]
+                    elseif config.options.night_vision.virtual_text == "letter" then
+                        virt_text_content = mark.mark .. ' '
+                    else
+                        virt_text_content = config.options.night_vision.virtual_text
+                    end
                 end
 
                 -- Apply separate highlights for builtin marks
@@ -208,21 +210,24 @@ function M.update_virtual_text_for_cursor()
             goto continue
         end
 
+        local virt_text_content = ''
         local cursor_was_on = cursor_on_marked_lines[bufnr][mark.lnum] or false
         local cursor_is_on = (current_cursor == mark.lnum)
 
         -- Only update if state changed
         if cursor_was_on ~= cursor_is_on then
-            local virt_text_content = cursor_is_on and '' or config.options.night_vision.virtual_text
+            if mark.builtin then
+                virt_text_content = cursor_is_on and '' or config.options.builtin_marks.show_virtual_text[mark.type]
+            elseif config.options.night_vision.virtual_text == "letter" then
+                virt_text_content = mark.mark .. ' '
+            else
+                virt_text_content = cursor_is_on and '' or config.options.night_vision.virtual_text
+            end
 
             -- Delete old extmark if it exists
             local old_id = vt_extmark_ids[bufnr][mark.lnum]
             if old_id then
                 pcall(vim.api.nvim_buf_del_extmark, bufnr, ns_id_vt, old_id)
-            end
-
-            if config.options.night_vision.virtual_text == "letter" and not cursor_is_on then
-                virt_text_content = mark.mark .. ' '
             end
 
             -- Avoid duplicate VT icons on same line
@@ -338,7 +343,7 @@ function M.toggle()
 
                         local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
                         {
-                            sign_text = mark.mark,
+                            sign_text = mark.sign,
                             sign_hl_group = "BuiltinMark_" .. hl_type,
                             number_hl_group = "BuiltinMark_" .. hl_type,
                             priority = 4000
@@ -440,7 +445,7 @@ function M.refresh()
 
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
                     {
-                        sign_text = mark.mark,
+                        sign_text = mark.sign,
                         sign_hl_group = "BuiltinMark_" .. hl_type,
                         number_hl_group = "BuiltinMark_" .. hl_type,
                         priority = 4000
@@ -535,7 +540,7 @@ local function apply_night_vision_to_buffer()
 
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
                     {
-                        sign_text = mark.mark,
+                        sign_text = mark.sign,
                         sign_hl_group = "BuiltinMark_" .. hl_type,
                         number_hl_group = "BuiltinMark_" .. hl_type,
                         priority = 4000

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.4] - 2025-12-31
+
+### Added
+- Toggle function to add/remove mark on current line (reduces mental overhead)
+- Custom sign column icons for builtin marks
+- Custom virtual text for builtin marks
+
+
 ## [1.3.3] - 2025-12-30
 
 ### Added

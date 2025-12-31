@@ -42,7 +42,18 @@ M.defaults = {
     -- Use Neovim's builtin marks
     builtin_marks = {
         enabled = true,
-        show_marks = { ".", "^", '"' },
+        show_signs = {
+            last_change = ".",
+            last_insert = "^",
+            visual_start = "<",
+            visual_end = ">",
+        },
+        show_virtual_text = {
+            last_change = " ",
+            last_insert = " ",
+            visual_start = " ",
+            visual_end = " ",
+        },
     },
     -- Night Vision configuration and highlights
     night_vision = {

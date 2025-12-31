@@ -66,19 +66,22 @@ function M.marks(opts, mode)
 
                 -- Format display entries
                 local make_display = function(entry_tb)
-                    local mark_hl, lnum_hl
+                    local mark_hl, lnum_hl, mark
 
                     -- Determine highlight groups based on mark type
                     if entry_tb.value.builtin then
+                        -- Display custom sign for builtin marks
+                        mark = entry_tb.value.sign
                         mark_hl = "BuiltinMark_" .. entry_tb.value.type
                         lnum_hl = "BuiltinMark_" .. entry_tb.value.type
                     else
+                        mark = entry_tb.value.mark
                         mark_hl = "MarksmanMark"
                         lnum_hl = "MarksmanLine"
                     end
 
                     return displayer({
-                        { entry_tb.value.mark, mark_hl },
+                        { mark, mark_hl },
                         { tostring(entry_tb.value.lnum), lnum_hl },
                         entry_tb.value.display,
                     })
