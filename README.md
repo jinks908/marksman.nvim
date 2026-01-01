@@ -371,6 +371,9 @@ require('marksman').setup({
 - **Documentation**: See inline comments in `lua/marksman/*.lua`
 - **Similar Plugins**:
     - [marks.nvim](https://github.com/chentoast/marks.nvim)
+    - [Harpoon](https://github.com/ThePrimeagen/harpoon/tree/harpoon2)
+    - [vim-signature](https://github.com/kshenoy/vim-signature)
+    - [vim-bookmarks](https://github.com/MattesGroeger/vim-bookmarks)
 
 ---
 
