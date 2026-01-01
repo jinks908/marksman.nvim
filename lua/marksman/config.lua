@@ -87,6 +87,12 @@ M.defaults = {
         toggle_night_vision = "<leader>nv",
         set_manual_marks = true,  -- Set marks manually (ma, mb, ..., mz)
         del_manual_marks = true,  -- Delete marks manually (dma, dmb, ..., dmz)
+        picker = {
+            next_item = "<C-j>",
+            prev_item = "<C-k>",
+            delete_mark = "<C-d>",
+            insert_mode = "<C-i>"
+        }
     }
 }
 

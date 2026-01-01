@@ -38,6 +38,10 @@ function M.marks(opts, mode)
 
     -- Get default/user config options
     opts = vim.tbl_deep_extend("force", config.options, opts or {})
+
+    -- Get picker keymaps
+    local picker_km = config.options.keymaps.picker
+
     pickers.new(opts, {
         initial_mode = start_mode,
         prompt_title = "Goto Mark",
@@ -139,9 +143,10 @@ function M.marks(opts, mode)
             -- for normal mode navigation as well as <C-d> for deleting marks
             map("n", "k", function() return false end)
             map("n", "l", function() return false end)
-            map("n", "<C-d>", function() return false end)
-            map("n", "<C-k>", function() return false end)
-            map("n", "<C-l>", function() return false end)
+            map("n", "j", function() return false end)
+            map("n", picker_km.delete_mark, function() return false end)
+            map("n", picker_km.prev_item, function() return false end)
+            map("n", picker_km.next_item, function() return false end)
 
             -- Create normal mode hotkey mappings (i.e., pressing mark letter jumps to mark)
             for i = 97, 122 do
@@ -152,14 +157,14 @@ function M.marks(opts, mode)
             -- Standard Mappings
             local maps = {
                 n = {
-                    ["<C-l>"] = function() actions.move_selection_next(prompt_bufnr) end,
-                    ["<C-k>"] = function() actions.move_selection_previous(prompt_bufnr) end,
+                    [picker_km.next_item] = function() actions.move_selection_next(prompt_bufnr) end,
+                    [picker_km.prev_item] = function() actions.move_selection_previous(prompt_bufnr) end,
                     ["<CR>"] = function()
                         local selection = action_state.get_selected_entry()
                         goto_mark(selection.value.mark)
                     end,
                     -- Delete selected mark
-                    ["<C-d>"] = function()
+                    [picker_km.delete_mark] = function()
                         local selection = action_state.get_selected_entry()
                         actions.close(prompt_bufnr)
                         vim.cmd("delmark " .. selection.value.mark)
@@ -172,7 +177,7 @@ function M.marks(opts, mode)
                         vim.schedule(M.marks)
                     end,
                     -- Switch to "insert" mode
-                    ["<C-i>"] = function()
+                    [picker_km.insert_mode] = function()
                         actions.move_to_top(prompt_bufnr)
                         vim.cmd("startinsert!")
                     end,

@@ -8,9 +8,9 @@
 
 ## Core Problem Solved
 
-Vim marks are powerful but invisible. You set them with `ma`, `mb`, etc., but then you forget where they are. Marksman solves this by:
+Vim marks are powerful but invisible. You set them with `ma`, `mb`, etc., but then you forget where they are and which letters are for what. Marksman solves this by:
 - Highlighting marked lines in real-time
-- Showing mark letters in the gutter
+- Showing indicators in the gutter
 - Adding virtual text icons as visual anchors
 - Providing a Telescope picker to browse marks
 - Remembering when marks were created (timestamps)
@@ -89,44 +89,33 @@ marksman.night_vision()             -- Toggle Night Vision on/off
 marksman.refresh()                  -- Refresh Night Vision display
 ```
 
-## Recommended Keymaps
-
-**Note**: The keymaps for `ma-mz` are **automatically registered** when you call `setup()` with `keymaps.enabled = true` (the default). The examples below show how to customize additional keymaps or override the defaults:
+## Default Keymaps
 
 ```lua
-local marksman = require('marksman')
-local opts = { noremap = true, silent = true }
-
--- Auto-mark
-vim.keymap.set('n', '<leader>m', marksman.auto_mark, opts)
-
--- Navigate marks
-vim.keymap.set('n', '<M-]>', function() marksman.next_mark(true) end, opts)
-vim.keymap.set('n', '<M-[>', function() marksman.next_mark(false) end, opts)
-
--- Delete marks
-vim.keymap.set('n', '<leader>dm', marksman.delete_mark, opts)
-vim.keymap.set('n', '<leader>dam', marksman.delete_all_marks, opts)
-
--- Toggle Night Vision
-vim.keymap.set('n', '<leader>nv', marksman.night_vision, opts)
-
--- Open Telescope picker
-vim.keymap.set('n', '<C-m>', '<cmd>Telescope marksman marks<CR>', opts)
+marksman.setup({
+    keymaps = {
+        open_picker = "<leader>mp",
+        next_mark = "<]m>",
+        prev_mark = "<[m>",
+        toggle_mark = "<leader>m",
+        delete_all_marks = "<leader>dam",
+        toggle_night_vision = "<leader>nv",
+        set_manual_marks = true,  -- Set marks manually (ma, mb, ..., mz)
+        del_manual_marks = true,  -- Delete marks manually (dma, dmb, ..., dmz)
+    }
+})
 ```
-
-To disable auto-registration of `ma-mz` keymaps, set `keymaps.enabled = false` in your setup config.
 
 ## Telescope Picker Usage
 
-Open with `:Telescope marksman marks` or mapped key (e.g., `<C-m>`)
+Open with `:Telescope marksman marks` or mapped key (e.g., `<leader>mp`)
 
 **In the picker:**
 - Type letter (e.g., `a`) - Jump to that mark instantly
 - `<CR>` - Select and jump to highlighted mark
 - `<C-d>` - Delete selected mark
 - `<C-i>` - Switch to insert mode for filtering
-- `<C-j>/<C-k>` - Navigate marks (normal mode)
+- `<C-k>/<C-j>` - Move selection up/down
 
 ## Configuration Options
 
