@@ -6,14 +6,45 @@
 
 **Marksman** is a Neovim plugin that enhances the native Vim mark system with visual feedback and modern UI. The flagship feature is **Night Vision** - a real-time visual highlighting system that shows you exactly where your marks are placed in the buffer.
 
-## Core Problem Solved
+## Core Philosophy
 
-Vim marks are powerful but invisible. You set them with `ma`, `mb`, etc., but then you forget where they are and which letters are for what. Marksman solves this by:
-- Highlighting marked lines in real-time
-- Showing indicators in the gutter
-- Adding virtual text icons as visual anchors
-- Providing a Telescope picker to browse marks
-- Remembering when marks were created (timestamps)
+Here's the thing. Vim marks are powerful but invisible. You set them with `ma`, `mb`, etc., but then you forget where they are and which letters are for what. This becomes even more unwieldy when working with marks across multiple files/buffers. Such drawbacks are cumbersome and typically limit manual mark usage to only 3-5 at most. Marksman completely solves this problem by providing you with an intuitive interface that eliminates the mental overhead of managing vim marks, and even enhances your editor experience with useful visuals.
+
+- Provides visual cues, making marks easy to see, navigate, and manage
+- Highlights marked lines in real-time
+- Shows indicators in the gutter (sign column)
+- Adds virtual text icons as visual anchors
+- Provides a Telescope picker to browse marks
+- Remembers when marks were created (timestamps)
+
+The result is an intuitive, seamless experience that makes working with marks painless and efficient. You can now set as many marks as you want and let Marksman do the rest. Effortlessly navigate between them, set/remove them, quickly identify and distinguish between Neovim's builtin marks, and focus on your code instead of trying to remember a bunch of letters.
+
+In short, you've been setting and forgetting. Don't lie to me. Don't lie to your family. We all know the truth. Fortunately, this is **exactly** what Marksman **wants** you to do. See? You don't even have to change your habits. You know you're going to set 'em and forget 'em anyway. So go on then. Forget.
+
+## Contents
+- [Key Features at a Glance](#key-features-at-a-glance)
+- [Installation](#installation)
+- [Basic Setup](#basic-setup)
+- [Essential API Functions](#essential-api-functions)
+- [Default Keymaps](#default-keymaps)
+- [Configuration](#configuration)
+    - [Night Vision](#night-vision)
+    - [Telescope Picker](#telescope-picker)
+    - [Telescope Picker Layout](#telescope-picker-layout)
+- [How Night Vision Works](#how-night-vision-works)
+    - [Visual Components](#visual-components)
+    - [Per-Buffer State](#per-buffer-state)
+- [Storage and Persistence](#storage-and-persistence)
+    - [Mark Timestamps](#mark-timestamps)
+    - [Why Timestamps?](#why-timestamps)
+- [Dependencies](#dependencies)
+- [File Locations](#file-locations)
+- [Configuration Examples](#configuration-examples)
+    - [Minimal Setup (Marks Only, No Night Vision)](#minimal-setup-marks-only-no-night-vision)
+    - [Visual-Heavy Setup (Everything Highlighted)](#visual-heavy-setup-everything-highlighted)
+- [Keyboard Cheat Sheet](#keyboard-cheat-sheet)
+- [Resources](#resources)
+
 
 ## Key Features at a Glance
 
@@ -55,12 +86,6 @@ Plug 'nvim-telescope/telescope.nvim'
 Plug 'jinks908/marksman.nvim'
 ```
 
-> [!note] Note: For a visual enhancement, it recommended to use Nerd Font symbols for sign column and/or virtual text icons as they can be more useful indicators. The default virtual text icon is ` ` (see screenshot).
-
-![NerdFont Icons](https://github.com/user-attachments/assets/2d136aa8-1881-4285-b03d-f429aa557ad4)
-
-![NerdFont Icons Picker](https://github.com/user-attachments/assets/e49d98f3-c862-47d7-8469-fd26a7acc8dc)
-
 ## Basic Setup
 
 ```lua
@@ -71,6 +96,7 @@ require('marksman').setup({
         line_nr_highlight = true,    -- Highlight line numbers
         sign_column = "letter",      -- Show in gutter: "letter" (mark a-z), custom character, or "none"
         sort_by = "line",            -- Sort by "line", "alphabetical", or "recency"
+        virtual_text =  "●",         -- Virtual text icon (set to "" to disable)
         silent = true,               -- Suppress mark operation notifications
     }
 })
@@ -82,37 +108,38 @@ require('marksman').setup({
 local marksman = require('marksman')
 
 -- Mark Operations
-marksman.set_mark('a')              -- Set mark 'a' at cursor
-marksman.auto_mark()                -- Auto-assign next free letter
-marksman.next_mark(true)            -- Jump to next mark
-marksman.next_mark(false)           -- Jump to previous mark
-marksman.delete_mark()              -- Delete mark on current line
-marksman.delete_by_letter('a')      -- Delete specific mark
-marksman.delete_all_marks()         -- Clear all marks in buffer
+marksman.set_mark('a')           -- Set mark 'a' at cursor
+marksman.auto_mark()             -- Auto-assign next free letter
+marksman.next_mark(true)         -- Jump to next mark
+marksman.next_mark(false)        -- Jump to previous mark
+marksman.delete_mark()           -- Delete mark on current line
+marksman.delete_by_letter('a')   -- Delete specific mark
+marksman.delete_all_marks()      -- Clear all marks in buffer
 
 -- Night Vision Control
-marksman.night_vision()             -- Toggle Night Vision on/off
-marksman.refresh()                  -- Refresh Night Vision display
+marksman.night_vision()          -- Toggle Night Vision on/off
+marksman.refresh()               -- Refresh Night Vision display
 ```
 
 ## Default Keymaps
 
+### Main Keymaps
 ```lua
-marksman.setup({
+require('marksman').setup({
     keymaps = {
-        open_picker = "<leader>mp",
-        next_mark = "<]m>",
-        prev_mark = "<[m>",
-        toggle_mark = "<leader>m",
-        delete_all_marks = "<leader>dam",
-        toggle_night_vision = "<leader>nv",
-        set_manual_marks = true,  -- Set marks manually (ma, mb, ..., mz)
-        del_manual_marks = true,  -- Delete marks manually (dma, dmb, ..., dmz)
+        open_picker = "<leader>mp",          -- Open Telescope picker
+        next_mark = "<]m>",                  -- Jump to next mark (w/ wraparound)
+        prev_mark = "<[m>",                  -- Jump to previous mark (w/ wraparound)
+        toggle_mark = "<leader>m",           -- Toggle mark at cursor (set/delete)
+        delete_all_marks = "<leader>dam",    -- Delete all marks in buffer
+        toggle_night_vision = "<leader>nv",  -- Toggle Night Vision on/off
+        set_manual_marks = true,             -- Set marks manually (ma, mb, ..., mz)
+        del_manual_marks = true,             -- Delete marks manually (dma, dmb, ..., dmz)
     }
 })
 ```
 
-## Telescope Picker Usage
+### Telescope Picker Keymaps
 
 Open with `:Telescope marksman marks` or mapped key (e.g., `<leader>mp`)
 
@@ -123,95 +150,96 @@ Open with `:Telescope marksman marks` or mapped key (e.g., `<leader>mp`)
 - `<C-i>` - Switch to insert mode for filtering
 - `<C-k>/<C-j>` - Move selection up/down
 
-## Configuration Options
+> [!NOTE]
+> You can send marks to quickfix from the Telescope picker with `<C-q>`.
 
-### Night Vision Settings
+
+
+## Configuration
+
+### Night Vision
 
 ```lua
-night_vision = {
-    enabled = true,                 -- Auto-enable on plugin load
-    line_highlight = true,          -- Background color on marked lines
-    line_nr_highlight = true,       -- Highlight line numbers
-    sign_column = "letter",      -- Show in gutter: "letter" (mark a-z), custom character, or "none"
-    virtual_text = "  ",           -- Virtual text icon (set to "" to disable)
-    sort_by = "line",               -- Sort marks: "line", "alphabetical", "recency"
-    silent = true,                  -- Suppress mark operation notifications
-    highlights = {
-        line = { fg = "#000000", bg = "#5fd700" },
-        line_nr = { fg = "#5fd700", bg = "NONE", bold = true },
-        virtual_text = { fg = "#5fd700", bg = "NONE" },
-    },
-}
+require('marksman').setup({
+    night_vision = {
+        enabled = true,                 -- Auto-enable on plugin load
+        line_highlight = true,          -- Background color on marked lines
+        line_nr_highlight = true,       -- Highlight line numbers
+        sign_column = "letter",         -- Show in gutter: "letter" (mark a-z), custom character, or "none"
+        virtual_text = "●",             -- Virtual text icon (set to "" to disable)
+        sort_by = "line",               -- Sort marks: "line", "alphabetical", "recency"
+        silent = true,                  -- Suppress mark operation notifications
+        highlights = {
+            line = { fg = "#000000", bg = "#00ffaf" },
+            line_nr = { fg = "#00ffaf", bg = "NONE", bold = true },
+            virtual_text = { fg = "#00ffaf", bg = "NONE" },
+        },
+    }
+})
 ```
 
-**Silent Mode**: When `silent = true`, the following operations are suppressed:
-- Mark setting/updating (from `set_mark()`, `auto_mark()`)
-- Mark deletion (from `delete_mark()`, `delete_by_letter()`, `delete_all_marks()`)
-- Night Vision toggle notifications
-- Navigation warnings (e.g., no marks in buffer)
+**Silent Mode**: Using `silent = true` suppresses notifications.
 
-### Telescope Picker Highlights
+> [!NOTE]
+> For a visual enhancement, it recommended to use Nerd Font symbols for sign column and/or virtual text icons as they can be more useful indicators (See screenshots).
+
+![Night Vision](https://github.com/user-attachments/assets/2d136aa8-1881-4285-b03d-f429aa557ad4)
+
+
+
+### Telescope Picker
 
 This section configures the appearance of marks and selections in the Telescope picker UI:
 
 ```lua
-highlights = {
-    mark = {
-        fg = "#ffaf00",
-        bg = "NONE",
-        bold = true,
-    },
-    mark_selected = {
-        fg = "NONE",
-        bg = "#2A314C",
-        bold = true,
-    },
-    line_nr = {
-        fg = "#00aeff",
-        bg = "NONE",
-        bold = true,
-    },
-}
+require('marksman').setup({
+    highlights = {
+        mark = {
+            fg = "#00aeff",
+            bg = "NONE",
+            bold = true,
+        },
+        mark_selected = {
+            fg = "NONE",
+            bg = "#2A314C",
+            bold = true,
+        },
+        line_nr = {
+            fg = "#00ffaf",
+            bg = "NONE",
+            bold = true,
+        }
+    }
+})
 ```
 
 ### Telescope Picker Layout
 
 ```lua
-layout_config = {
-    width = 0.95,        -- Width as percentage of screen
-    height = 0.5,        -- Height as percentage of screen
-    preview_width = 0.7, -- Preview column width
-}
+require('marksman').setup({
+    layout_config = {
+        width = 0.95,        -- Width as percentage of screen
+        height = 0.5,        -- Height as percentage of screen
+        preview_width = 0.7, -- Preview column width
+    }
+})
 ```
+![Marksman Picker](https://github.com/user-attachments/assets/e49d98f3-c862-47d7-8469-fd26a7acc8dc)
 
-### Configuration Validation
 
-The plugin validates certain configuration values and will reset invalid values to defaults with an error notification:
-
-- **`sign_column`**: Must be one of `"letter"` (default), `"none"`, or a single character string (e.g., `"*"`).
-- **`sort_by`**: Must be one of `"line"` (default), `"alphabetical"`, or `"recency"`
-
-Invalid values will trigger an error notification and reset to their defaults.
 
 ## How Night Vision Works
 
 ### Visual Components
 
-When Night Vision is **ON**, marked lines display:
+When Night Vision is **ON**, marked lines can display:
 
-1. **Line Background** - Colored background across entire line
-2. **Line Number** - Colored line number in gutter
-3. **Sign Column** - Mark letter or icon in left gutter
-4. **Virtual Text Icon** - Decorative icon (right-aligned, auto-hides when cursor on line)
+- **Line Background** - Colored background across entire line
+- **Line Number** - Colored line number in gutter
+- **Sign Column** - Mark letter or icon in left gutter
+- **Virtual Text** - Visual indicator inside the editor (right-aligned)
+    - Auto-hides on cursor hover (this reduces visual clutter while editing marked lines).
 
-### Smart Icon Behavior
-
-The virtual text icon:
-- **Appears** when cursor is NOT on the line (visual anchor)
-- **Disappears** when cursor IS on the line (clean editing)
-- Updates smoothly as you navigate
-
-This reduces visual clutter while editing marked lines.
 
 ### Per-Buffer State
 
@@ -233,83 +261,6 @@ Each buffer maintains independent Night Vision state:
 - Track when marks were created
 - Find recently-modified locations quickly
 
-## Use Cases
-
-### Development
-- Mark important functions/classes
-- Highlight bug locations during debugging
-- Visual anchors during code review
-- Jump between related code sections
-
-### Writing
-- Mark sections under review
-- Highlight areas needing rewrite
-- Navigate between work locations
-- Track editing progress
-
-### Research
-- Mark relevant sections
-- Highlight key findings
-- Quick navigation between sources
-- Visual reference points
-
-## Performance Notes
-
-- **Minimal overhead**: ~1-2% CPU when idle with Night Vision on
-- **Fast cursor tracking**: Sub-millisecond virtual text updates
-- **Efficient storage**: JSON files ~100 bytes per mark
-- **Smart updates**: Only updates changed lines on cursor move
-
-## Common Workflows
-
-### Quick Navigation Workflow
-```
-1. ma               ← Mark section A
-2. mb               ← Mark section B
-3. <M-]>            ← Jump to next mark
-4. <M-[>            ← Jump to previous mark
-5. <C-m>            ← Open picker to browse all marks
-6. <leader>dm       ← Delete mark when done
-```
-
-### Debugging Workflow
-```
-1. <leader>m        ← Auto-mark error line
-2. <leader>m        ← Auto-mark suspicious line
-3. <C-m>            ← Open picker to see all problem areas
-4. <M-]>/<M-[>      ← Jump between marked locations
-5. <leader>dam      ← Clear all marks after fixing
-```
-
-### Multi-File Workflow
-```
-1. ma (file1)       ← Mark location in file 1
-2. :e file2         ← Open file 2
-3. mb (file2)       ← Mark location in file 2
-4. <leader>nv       ← Toggle Night Vision
-5. <C-m>            ← Jump between files using picker
-```
-
-## Troubleshooting
-
-### Night Vision not showing
-- Ensure `night_vision.enabled = true` in setup
-- Check that marks exist in current buffer (`:marks`)
-- Try `<leader>nv` to toggle on if toggled off
-
-### Icons not disappearing when cursor on line
-- This is expected behavior - virtual text icons hide when editing marked lines
-- Move cursor away to see icons reappear
-
-### Marks not persisting across sessions
-- Marks are Vim native - they don't persist by default
-- Plugin only adds visual feedback and timestamps
-- Use a session plugin if persistence needed
-
-### Telescope picker not working
-- Ensure telescope.nvim is installed
-- Check that `require('telescope').load_extension('marksman')` called
-- Try `:Telescope marksman marks` directly
 
 ## Dependencies
 
@@ -324,28 +275,29 @@ Without Telescope, core mark operations still work - just no picker.
 - **Timestamp storage**: `~/.local/share/nvim/marksman/`
 - **Telescope extension**: `lua/telescope/_extensions/marksman/`
 
-## Architecture Overview
 
-```
-init.lua (Plugin initialization & orchestration)
-    ├── marks.lua ↔ night_vision.lua (circular dependency, resolved via init())
-    │   ├── Mark operations (set, auto, delete, navigate)
-    │   └── Visual highlights (line, virtual text, signs)
-    ├── data.lua (Timestamp persistence)
-    │   └── JSON storage: ~/.local/share/nvim/marksman/
-    └── [Optional] telescope extension
-        └── picker.lua (Mark browsing UI)
-```
-
-Each core module is designed to work independently, with init.lua serving as the orchestrator that handles autocommands and configuration management.
-
-## Advanced Configuration Examples
+## Configuration Examples
 
 ### Minimal Setup (Marks Only, No Night Vision)
 ```lua
 require('marksman').setup({
     night_vision = {
         enabled = false
+    },
+    keymaps = {
+        open_picker = "<leader>mp",
+        next_mark = "<]m>",
+        prev_mark = "<[m>",
+        toggle_mark = "<leader>m",
+        delete_all_marks = "<leader>dam",
+        set_manual_marks = true,
+        del_manual_marks = true,
+        picker = {
+            next_item = "<C-j>",
+            prev_item = "<C-k>",
+            delete_mark = "<C-d>",
+            insert_mode = "<C-i>"
+        }
     }
 })
 ```
@@ -360,11 +312,6 @@ require('marksman').setup({
     },
     highlights = {
         mark = {
-            fg = "#ffaf00",
-            bg = "NONE",
-            bold = true,
-        },
-        line_nr = {
             fg = "#00aeff",
             bg = "NONE",
             bold = true,
@@ -374,32 +321,31 @@ require('marksman').setup({
             bg = "#2A314C",
             bold = true,
         },
+        line_nr = {
+            fg = "#00ffaf",
+            bg = "NONE",
+            bold = true,
+        },
     },
     night_vision = {
         enabled = true,
-        line_highlight = false,
+        line_highlight = true,
         line_nr_highlight = true,
         sign_column = "letter",
+        virtual_text =  "●",
         sort_by = "line",
-        virtual_text =  "  ",
         silent = true,
         highlights = {
-            line = {
-                fg = "#000000",
-                bg = "#5fd700",
-                bold = true,
-                italic = true,
-            },
-            line_nr = {
-                fg = "#5fd700",
-                bg = "NONE",
-                bold = true,
-            },
-            virtual_text = {
-                fg = "#5fd700",
-                bg = "NONE",
-                bold = true,
-            },
+            line = { fg = "#000000", bg = "#00ffaf", },
+            line_nr = { fg = "#00ffaf", bg = "NONE", bold = true, },
+            virtual_text = { fg = "#00ffaf", bg = "NONE", bold = true, },
+            last_change = { fg = "#f7768e", bg = "NONE", bold = true },
+            last_insert = { fg = "#ff875f", bg = "NONE", bold = true },
+            visual_start = { fg = "#a6e87d", bg = "NONE", bold = true },
+            visual_end = { fg = "#a6e87d", bg = "NONE", bold = true },
+            last_jump_line = { fg = "#53adf9", bg = "NONE", bold = true },
+            last_jump = { fg = "#53adf9", bg = "NONE", bold = true },
+            last_exit = { fg = "#be86f7", bg = "NONE", bold = true },
         },
     },
 })
@@ -423,6 +369,8 @@ require('marksman').setup({
 - **GitHub**: `jinks908/marksman.nvim`
 - **Issues**: Report bugs and feature requests
 - **Documentation**: See inline comments in `lua/marksman/*.lua`
+- **Similar Plugins**:
+    - [marks.nvim](https://github.com/chentoast/marks.nvim)
 
 ---
 
