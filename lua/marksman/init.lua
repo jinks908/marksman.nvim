@@ -21,7 +21,7 @@
 
 local M = {}
 
-M.version = "1.3.3"
+M.version = "1.4.1"
 M.min_nvim_version = "0.8.0"
 
 -- Store setup state

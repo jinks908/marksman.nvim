@@ -1,6 +1,6 @@
 # Marksman for Neovim
 
-![marksman_header_2](https://github.com/user-attachments/assets/57625e07-2284-4155-b5bb-edd252e5f2cd)
+![Marksman Thumbnail](https://github.com/user-attachments/assets/57625e07-2284-4155-b5bb-edd252e5f2cd)
 
 ## What is Marksman?
 
@@ -54,6 +54,9 @@ use {
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'jinks908/marksman.nvim'
 ```
+
+> [!note] Note: For a visual enhancement, it recommended to use Nerd Font symbols for sign column and/or virtual text icons as they can be more useful indicators. The default virtual text icon is ` ` (see screenshot).
+
 
 ## Basic Setup
 
@@ -401,24 +404,16 @@ require('marksman').setup({
 
 ## Keyboard Cheat Sheet
 
-| Action | Default | Custom Option |
-|--------|---------|---------------|
-| Auto-mark | None | `<leader>m` |
-| Next mark | None | `<M-]>` |
-| Prev mark | None | `<M-[>` |
-| Toggle NV | None | `<leader>nv` |
-| Open picker | None | `<C-m>` |
-| Delete mark | None | `<leader>dm` |
-| Delete all | None | `<leader>dam` |
-| Manual mark | `m{a-z}` | `m` + letter (built-in) |
+| Action | Default |
+|--------|---------|
+| Toggle mark | `<leader>m` |
+| Next mark | `]m` |
+| Prev mark | `[m` |
+| Toggle Night Vision | `<leader>nv` |
+| Open picker | `<leader>mp` |
+| Delete all marks | `<leader>dam` |
+| Manual mark | `m` + letter (built-in) |
 
-## Best Practices
-
-1. **Use Auto-mark for Speed**: `<leader>m` is faster than `ma`, `mb`, etc.
-2. **Sort by Recency**: Great for resuming work after interruptions
-3. **Keep Mark Count Low**: 5-10 marks per file is ideal
-4. **Toggle NV as Needed**: Turn off if visual clutter bothers you
-5. **Use Picker for Browsing**: Fastest way to see all marks at once
 
 ## Resources
 
@@ -428,4 +423,4 @@ require('marksman').setup({
 
 ---
 
-*Last Updated: 2025-12-30 | Plugin Version: 1.3.3 | Neovim: 0.8.0+*
+*Last Updated: 2025-12-30 | Plugin Version: 1.4.1 | Neovim: 0.8.0+*
