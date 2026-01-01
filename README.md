@@ -153,7 +153,7 @@ Open with `:Telescope marksman marks` or mapped key (e.g., `<leader>mp`)
 > [!NOTE]
 > You can send marks to quickfix from the Telescope picker with `<C-q>`.
 
-
+![QF List Integration](https://github.com/user-attachments/assets/ea36219b-f762-49ac-9d22-af10407f47a9)
 
 ## Configuration
 
