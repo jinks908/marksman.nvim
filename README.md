@@ -57,6 +57,9 @@ Plug 'jinks908/marksman.nvim'
 
 > [!note] Note: For a visual enhancement, it recommended to use Nerd Font symbols for sign column and/or virtual text icons as they can be more useful indicators. The default virtual text icon is ` ` (see screenshot).
 
+![NerdFont Icons](https://github.com/user-attachments/assets/2d136aa8-1881-4285-b03d-f429aa557ad4)
+
+![NerdFont Icons Picker](https://github.com/user-attachments/assets/e49d98f3-c862-47d7-8469-fd26a7acc8dc)
 
 ## Basic Setup
 
