@@ -80,8 +80,8 @@ M.defaults = {
     -- Leave empty to disable keymap
     keymaps = {
         open_picker = "<leader>mp",
-        next_mark = "<]m>",
-        prev_mark = "<[m>",
+        next_mark = "]m",
+        prev_mark = "[m",
         toggle_mark = "<leader>m",
         delete_all_marks = "<leader>dam",
         toggle_night_vision = "<leader>nv",
