@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.3] - 2025-01-04
+
+### Fixed
+- Sign column / Line number conflicts with multi-marked lines (i.e., manual marks vs builtin marks)
+- Refactored Night Vision core logic for better maintainability
+
+
 ## [1.4.2] - 2025-01-03
 
 ### Changed
