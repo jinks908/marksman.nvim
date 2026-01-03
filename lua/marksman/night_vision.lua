@@ -184,15 +184,12 @@ local function refresh_all_virtual_text()
     local line_num = -1
     for _, mark in ipairs(current_marks) do
         -- Avoid duplicate VT icons on same line
-        if mark.lnum ~= line_num then
-            line_num = mark.lnum
-            if is_valid_line(bufnr, mark.lnum) then
-                local cursor_is_on = (current_cursor == mark.lnum)
-                local virt_text_content = get_virtual_text_content(mark, cursor_is_on)
-                local extmark_id = apply_virtual_text_extmark(bufnr, mark, virt_text_content)
-                vt_extmark_ids[bufnr][mark.lnum] = extmark_id
-                cursor_on_marked_lines[bufnr][mark.lnum] = cursor_is_on
-            end
+        if is_valid_line(bufnr, mark.lnum) then
+            local cursor_is_on = (current_cursor == mark.lnum)
+            local virt_text_content = get_virtual_text_content(mark, cursor_is_on)
+            local extmark_id = apply_virtual_text_extmark(bufnr, mark, virt_text_content)
+            vt_extmark_ids[bufnr][mark.lnum] = extmark_id
+            cursor_on_marked_lines[bufnr][mark.lnum] = cursor_is_on
         end
     end
 end
@@ -221,6 +218,15 @@ local function apply_marks_to_buffer(bufnr, should_clear)
     for _, mark in ipairs(current_marks) do
         if is_valid_line(bufnr, mark.lnum) and mark.lnum ~= line_num then
             line_num = mark.lnum
+            table.insert(M.mark_lines, mark.lnum)
+            apply_marks_for_line(bufnr, mark, options)
+        elseif is_valid_line(bufnr, mark.lnum) and not mark.builtin then
+            vim.api.nvim_buf_clear_namespace(bufnr, ns_id, mark.lnum, mark.lnum + 1)
+            vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, mark.lnum, mark.lnum + 1)
+            vim.api.nvim_buf_clear_namespace(bufnr, ns_id_builtin, mark.lnum, mark.lnum + 1)
+            table.insert(M.mark_lines, mark.lnum)
+            apply_marks_for_line(bufnr, mark, options)
+        else
             table.insert(M.mark_lines, mark.lnum)
             apply_marks_for_line(bufnr, mark, options)
         end
@@ -311,20 +317,7 @@ function M.update_virtual_text_for_cursor()
 
         -- Only update if state changed
         if cursor_was_on ~= cursor_is_on then
-            -- Avoid duplicate VT icons on same line
-            if mark.lnum ~= line_num then
-                line_num = mark.lnum
-                -- Delete old extmark if it exists
-                local old_id = vt_extmark_ids[bufnr][mark.lnum]
-                if old_id then
-                    pcall(vim.api.nvim_buf_del_extmark, bufnr, ns_id_vt, old_id)
-                end
-
-                -- Apply new virtual text
-                local virt_text_content = get_virtual_text_content(mark, cursor_is_on)
-                local extmark_id = apply_virtual_text_extmark(bufnr, mark, virt_text_content)
-                vt_extmark_ids[bufnr][mark.lnum] = extmark_id
-            end
+            M.refresh()
             -- Track the current cursor state for this line
             cursor_on_marked_lines[bufnr][mark.lnum] = cursor_is_on
         end
@@ -332,7 +325,6 @@ function M.update_virtual_text_for_cursor()
         ::continue::
     end
 end
-
 
 --- Toggle Night Vision on/off for current buffer
 --- @return nil
@@ -431,5 +423,6 @@ vim.api.nvim_create_autocmd('BufDelete', {
 
 -- Expose the apply function for manual use if needed
 M.apply_to_current_buffer = apply_night_vision_to_buffer
+M.apply_marks_to_buffer = apply_marks_to_buffer
 
 return M
