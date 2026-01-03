@@ -125,8 +125,8 @@ local function apply_builtin_mark_extmark(bufnr, mark)
     local hl_type = mark.type
     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0, {
         sign_text = mark.sign or '',
-        sign_hl_group = "BuiltinMark_" .. hl_type,
-        number_hl_group = "BuiltinMark_" .. hl_type,
+        sign_hl_group = mark.sign and "BuiltinMark_" .. hl_type or nil,
+        number_hl_group = mark.line_hl and "BuiltinMark_" .. hl_type or nil,
         priority = 2000
     })
     buffer_signs[bufnr][extmark_id] = true
@@ -198,8 +198,8 @@ local function refresh_all_virtual_text()
 end
 
 -- Core function to apply all marks to a buffer
--- @param bufnr - Buffer number
--- @param should_clear - Whether to clear existing marks first
+--- @param bufnr - Buffer number
+--- @param should_clear - Whether to clear existing marks first
 local function apply_marks_to_buffer(bufnr, should_clear)
     local current_marks = marks.get_marks()
     local options = get_config_options()

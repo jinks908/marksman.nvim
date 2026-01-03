@@ -71,8 +71,9 @@ M.get_builtin_marks = function()
             table.insert(builtin_marks, {
                 -- NOTE: Use 'symbol' as mark identifier and 'sign' for custom display
                 mark = symbol,
-                sign = opts.sign,
                 lnum = pos[2],
+                sign = opts.sign,
+                line_hl = opts.line_nr,
                 vt = opts.virtual_text,
                 display = line_content:gsub('^%s*', ''),
                 builtin = true,
