@@ -42,17 +42,25 @@ M.defaults = {
     -- Use Neovim's builtin marks
     builtin_marks = {
         enabled = true,
-        show_signs = {
-            last_change = ".",
-            last_insert = "^",
-            visual_start = "<",
-            visual_end = ">",
+        last_change = {
+            sign = ".",          -- `false` to disable
+            line_nr = true,      -- `false` to disable
+            virtual_text = ".",  -- `false` to disable
         },
-        show_virtual_text = {
-            last_change = ".",
-            last_insert = "^",
-            visual_start = "<",
-            visual_end = ">",
+        last_insert = {
+            sign = "^",
+            line_nr = true,
+            virtual_text = "^",
+        },
+        visual_start = {
+            sign = "<",
+            line_nr = true,
+            virtual_text = "<",
+        },
+        visual_end = {
+            sign = ">",
+            line_nr = true,
+            virtual_text = ">",
         },
     },
     -- Night Vision configuration and highlights

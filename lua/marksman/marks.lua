@@ -59,9 +59,9 @@ M.get_builtin_marks = function()
 
     local builtin_marks = {}
     -- Get enabled marks
-    local show_signs = config.options.builtin_marks.show_signs
+    local enabled_marks = config.options.builtin_marks
 
-    for type, sign in pairs(show_signs) do
+    for type, opts in pairs(enabled_marks) do
         local symbol = get_builtin_mark_type(type)
         local pos = vim.fn.getpos("'" .. symbol)
         -- Check if mark is in current buffer and valid
@@ -71,8 +71,9 @@ M.get_builtin_marks = function()
             table.insert(builtin_marks, {
                 -- NOTE: Use 'symbol' as mark identifier and 'sign' for custom display
                 mark = symbol,
-                sign = sign,
+                sign = opts.sign,
                 lnum = pos[2],
+                vt = opts.virtual_text,
                 display = line_content:gsub('^%s*', ''),
                 builtin = true,
                 type = type
@@ -242,7 +243,7 @@ M.toggle_mark = function()
     local marks = M.get_marks()
 
     for _, mark in ipairs(marks) do
-        if mark.lnum == line then
+        if mark.lnum == line and not mark.builtin then
             M.delete_mark()
             return
         end
@@ -313,7 +314,7 @@ M.delete_mark = function()
 
     -- Search for mark on current line
     for i = 1, #current_marks do
-        if current_marks[i].lnum == current_line then
+        if current_marks[i].lnum == current_line and not current_marks[i].builtin then
             -- Delete mark
             vim.cmd("delmark " .. current_marks[i].mark)
             data.remove_timestamp(current_marks[i].mark)

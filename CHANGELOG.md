@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.2] - 2025-01-03
+
+### Changed
+- Builtin marks are unaffected by toggle function
+- Added line number option for builtin marks
+- Option to enable/disable specific builtin mark types
+
+
 ## [1.4.0] - 2025-12-31
 
 ### Added

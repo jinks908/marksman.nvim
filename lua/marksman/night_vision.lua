@@ -105,7 +105,7 @@ local function refresh_all_virtual_text()
                 -- Show icon when cursor is NOT on a marked line
                 if not cursor_is_on then
                     if mark.builtin then
-                        virt_text_content = config.options.builtin_marks.show_virtual_text[mark.type]
+                        virt_text_content = config.options.builtin_marks[mark.type].virtual_text or ''
                     elseif config.options.night_vision.virtual_text == "letter" then
                         virt_text_content = mark.mark .. ' '
                     else
@@ -216,7 +216,7 @@ function M.update_virtual_text_for_cursor()
         -- Only update if state changed
         if cursor_was_on ~= cursor_is_on then
             if mark.builtin then
-                virt_text_content = cursor_is_on and '' or config.options.builtin_marks.show_virtual_text[mark.type]
+                virt_text_content = cursor_is_on and '' or (config.options.builtin_marks[mark.type].virtual_text or '')
             elseif config.options.night_vision.virtual_text == "letter" then
                 virt_text_content = mark.mark .. ' '
             else
@@ -306,6 +306,7 @@ function M.toggle()
                         vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                         {
                             line_hl_group = "NightVision",
+                            priority = 5000
                         })
                     end
                     if options.night_vision.line_nr_highlight and not mark.builtin then
@@ -342,10 +343,10 @@ function M.toggle()
 
                         local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
                         {
-                            sign_text = mark.sign,
+                            sign_text = mark.sign or '',
                             sign_hl_group = "BuiltinMark_" .. hl_type,
                             number_hl_group = "BuiltinMark_" .. hl_type,
-                            priority = 4000
+                            priority = 2000
                         })
                         buffer_signs[bufnr][extmark_id] = true
                     end
@@ -407,7 +408,7 @@ function M.refresh()
                     vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         line_hl_group = "NightVision",
-                        priority = 200
+                        priority = 5000
                     })
                 end
                 if options.night_vision.line_nr_highlight and not mark.builtin then
@@ -444,10 +445,10 @@ function M.refresh()
 
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
                     {
-                        sign_text = mark.sign,
+                        sign_text = mark.sign or '',
                         sign_hl_group = "BuiltinMark_" .. hl_type,
                         number_hl_group = "BuiltinMark_" .. hl_type,
-                        priority = 4000
+                        priority = 2000
                     })
                     buffer_signs[bufnr][extmark_id] = true
                 end
@@ -503,7 +504,7 @@ local function apply_night_vision_to_buffer()
                     vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0,
                     {
                         line_hl_group = "NightVision",
-                        priority = 200
+                        priority = 5000
                     })
                 end
                 if options.night_vision.line_nr_highlight and not mark.builtin then
@@ -540,10 +541,10 @@ local function apply_night_vision_to_buffer()
 
                     local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_builtin, mark.lnum - 1, 0,
                     {
-                        sign_text = mark.sign,
+                        sign_text = mark.sign or '',
                         sign_hl_group = "BuiltinMark_" .. hl_type,
                         number_hl_group = "BuiltinMark_" .. hl_type,
-                        priority = 4000
+                        priority = 2000
                     })
                     buffer_signs[bufnr][extmark_id] = true
                 end
