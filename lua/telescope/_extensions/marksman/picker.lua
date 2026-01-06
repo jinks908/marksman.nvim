@@ -169,7 +169,8 @@ function M.marks(opts, mode)
                         actions.close(prompt_bufnr)
                         vim.cmd("delmark " .. selection.value.mark)
                         vim.notify(" Mark '" .. selection.value.mark .. "' deleted", vim.log.levels.INFO, { title = " Marksman  " })
-                        if M.nv_state then
+                        local bufnr = vim.api.nvim_get_current_buf()
+                        if night_vision.nv_state[bufnr] then
                             -- Refresh Night Vision if enabled
                             night_vision.refresh()
                         end

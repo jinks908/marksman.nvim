@@ -31,11 +31,6 @@ function M.init()
     night_vision = require('marksman.night_vision')
 end
 
--- Helper function to safely get config options
-local function get_config_options()
-    return config.options or config.defaults
-end
-
 -- Helper function to map builtin mark types to native symbols
 local function get_builtin_mark_type(mark)
     local types = {
@@ -136,16 +131,13 @@ function M.get_marks()
         end
     end
 
-    -- Get config options safely
-    local options = get_config_options()
-
     -- Sort marks based on user config
-    if options.night_vision.sort_by == "alphabetical" then
+    if config.options.night_vision.sort_by == "alphabetical" then
         -- Sort marks by alphabetical order
         table.sort(marks_list, function(a, b)
             return a.mark < b.mark
         end)
-    elseif options.night_vision.sort_by == "recency" then
+    elseif config.options.night_vision.sort_by == "recency" then
         -- Sort marks by recency
         table.sort(marks_list, function(a, b)
             return a.timestamp > b.timestamp
@@ -189,6 +181,7 @@ end
 --- @see delete_mark to remove mark from current line
 --- @see toggle_mark to toggle mark on current line
 M.set_mark = function(letter)
+    local bufnr = vim.api.nvim_get_current_buf()
     local line_num = vim.api.nvim_win_get_cursor(0)[1]
 
     if not letter or #letter ~= 1 or not letter:match('[a-z]') then
@@ -198,11 +191,10 @@ M.set_mark = function(letter)
 
     vim.cmd("normal! m" .. letter)
     data.add_timestamp(letter)
-    if night_vision and night_vision.nv_state then
+    if night_vision and night_vision.nv_state[bufnr] then
         night_vision.refresh()
     end
-    local options = get_config_options()
-    if not options.night_vision.silent then
+    if not config.options.night_vision.silent then
         vim.notify(" Line " .. line_num .. " marked as '" .. letter .. "'", vim.log.levels.INFO, { title = " Marksman  " })
     end
 end
@@ -214,6 +206,7 @@ end
 --- @see auto_mark to auto-assign mark to current line
 --- @see toggle_mark to toggle mark on current line
 M.auto_mark = function()
+    local bufnr = vim.api.nvim_get_current_buf()
     local free_mark = get_first_available_mark()
     local line_num = vim.api.nvim_win_get_cursor(0)[1]
     -- If no available marks, return
@@ -224,12 +217,11 @@ M.auto_mark = function()
     -- Otherwise mark current line
     vim.cmd("normal! m" .. free_mark)
     data.add_timestamp(free_mark)
-    if night_vision and night_vision.nv_state then
+    if night_vision and night_vision.nv_state[bufnr] then
         -- Refresh Night Vision if enabled
         night_vision.refresh()
     end
-    local options = get_config_options()
-    if not options.night_vision.silent then
+    if not config.options.night_vision.silent then
         vim.notify(" Line " .. line_num .. " marked as '" .. free_mark .. "'", vim.log.levels.INFO, { title = " Marksman  " })
     end
 end
@@ -305,6 +297,7 @@ end
 --- @see auto_mark to auto-assign mark to current line
 --- @see toggle_mark to toggle mark on current line
 M.delete_mark = function()
+    local bufnr = vim.api.nvim_get_current_buf()
     local current_line = vim.fn.line('.')
     local current_marks = M.get_marks()
 
@@ -319,12 +312,11 @@ M.delete_mark = function()
             -- Delete mark
             vim.cmd("delmark " .. current_marks[i].mark)
             data.remove_timestamp(current_marks[i].mark)
-            local options = get_config_options()
-            if not options.night_vision.silent then
+            if not config.options.night_vision.silent then
                 vim.notify(" Mark '" .. current_marks[i].mark .. "' deleted", vim.log.levels.INFO, { title = " Marksman  " })
             end
             -- Refresh Night Vision if enabled
-            if night_vision and night_vision.nv_state then
+            if night_vision and night_vision.nv_state[bufnr] then
                 night_vision.refresh()
             end
             return true
@@ -338,17 +330,17 @@ end
 --- @param letter string Mark letter (a-z) to delete
 --- @return nil
 M.delete_by_letter = function(letter)
+    local bufnr = vim.api.nvim_get_current_buf()
     local current_marks = M.get_marks()
     for i = 1, #current_marks do
         if current_marks[i].mark == letter then
             vim.cmd("delmark " .. letter)
             data.remove_timestamp(letter)
-            local options = get_config_options()
-            if not options.night_vision.silent then
+            if not config.options.night_vision.silent then
                 vim.notify(" Mark '" .. letter .. "' deleted", vim.log.levels.INFO, { title = " Marksman  " })
             end
             -- Refresh Night Vision if enabled
-            if night_vision and night_vision.nv_state then
+            if night_vision and night_vision.nv_state[bufnr] then
                 night_vision.refresh()
             end
             return true
@@ -361,12 +353,16 @@ end
 --- Also clears all stored timestamps for marks in this buffer
 --- @return nil
 M.delete_all_marks = function()
+    local bufnr = vim.api.nvim_get_current_buf()
     -- Delete all lowercase (local) marks
     vim.cmd('delmarks a-z')
     data.clear_timestamps()
-    if night_vision and night_vision.nv_state then
+    vim.notify(" All marks deleted", vim.log.levels.INFO, { title = " Marksman  " })
+    if night_vision and night_vision.nv_state[bufnr] then
+        vim.notify(" Before: " .. vim.inspect(night_vision.nv_state), vim.log.levels.INFO, { title = " Marksman  " })
         night_vision.refresh()
     end
+    vim.notify(" After: " .. vim.inspect(night_vision.nv_state), vim.log.levels.INFO, { title = " Marksman  " })
 end
 
 return M

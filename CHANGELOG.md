@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.4] - 2025-01-06
+
+### Fixed
+- Replace `night_vision.nv_state` with correct `night_vision.nv_state[bufnr]` (for per-buffer behavior)
+- Remove redundant `get_config_options()` function (just use `local config = require('marksman.config')`)
+- Refactor notification logic (i.e., whether `silent = true/false` is set) 
+
+
 ## [1.4.3] - 2025-01-04
 
 ### Fixed
