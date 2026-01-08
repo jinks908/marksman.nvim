@@ -359,10 +359,8 @@ M.delete_all_marks = function()
     data.clear_timestamps()
     vim.notify(" All marks deleted", vim.log.levels.INFO, { title = " Marksman  " })
     if night_vision and night_vision.nv_state[bufnr] then
-        vim.notify(" Before: " .. vim.inspect(night_vision.nv_state), vim.log.levels.INFO, { title = " Marksman  " })
         night_vision.refresh()
     end
-    vim.notify(" After: " .. vim.inspect(night_vision.nv_state), vim.log.levels.INFO, { title = " Marksman  " })
 end
 
 return M
