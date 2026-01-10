@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.5] - 2025-01-09
+
+### Added
+- Option to ignore builtin marks from next/prev navigation
+- Enable/disable builtin mark types in Telescope picker
+
+
 ## [1.4.4] - 2025-01-06
 
 ### Fixed

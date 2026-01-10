@@ -42,25 +42,34 @@ M.defaults = {
     -- Use Neovim's builtin marks
     builtin_marks = {
         enabled = true,
+        skip_navigation = false, -- Skip builtin marks when navigating
         last_change = {
-            sign = ".",          -- `false` to disable
-            line_nr = true,      -- `false` to disable
-            virtual_text = ".",  -- `false` to disable
+            enabled = true, -- Set to `false` to disable
+            sign = ".", -- Set to `false` to disable
+            line_nr = true, -- Set to `false` to disable
+            virtual_text = ".", -- Set to `false` to disable
+            show_in_picker = true, -- Show in Telescope picker
         },
         last_insert = {
+            enabled = true,
             sign = "^",
             line_nr = true,
             virtual_text = "^",
+            show_in_picker = true,
         },
         visual_start = {
+            enabled = true,
             sign = "<",
             line_nr = true,
             virtual_text = "<",
+            show_in_picker = true,
         },
         visual_end = {
+            enabled = true,
             sign = ">",
             line_nr = true,
             virtual_text = ">",
+            show_in_picker = true,
         },
     },
     -- Night Vision configuration and highlights

@@ -42,6 +42,14 @@ function M.marks(opts, mode)
     -- Get picker keymaps
     local picker_km = config.options.keymaps.picker
 
+    -- Filter marks to only those enabled for picker
+    local picker_enabled = {}
+    for _, mark in ipairs(current_marks_list) do
+        if not mark.builtin or mark.picker then
+            table.insert(picker_enabled, mark)
+        end
+    end
+
     pickers.new(opts, {
         initial_mode = start_mode,
         prompt_title = "Goto Mark",
@@ -49,11 +57,11 @@ function M.marks(opts, mode)
         results_title = "Marksman  ",
         layout_config = opts.layout_config,
         finder = finders.new_table({
-            results = marks.get_marks(),
+            results = picker_enabled,
             entry_maker = function(entry)
                 -- Calculate maximum line number width (for highlighting)
                 local max_lnum = 0
-                for _, mark in ipairs(current_marks_list) do
+                for _, mark in ipairs(picker_enabled) do
                     max_lnum = math.max(max_lnum, mark.lnum)
                 end
                 local lnum_width = #tostring(max_lnum)

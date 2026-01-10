@@ -67,9 +67,11 @@ M.get_builtin_marks = function()
                 -- NOTE: Use 'symbol' as mark identifier and 'sign' for custom display
                 mark = symbol,
                 lnum = pos[2],
+                enabled = opts.enabled,
                 sign = opts.sign,
                 line_hl = opts.line_nr,
                 vt = opts.virtual_text,
+                picker = opts.show_in_picker,
                 display = line_content:gsub('^%s*', ''),
                 builtin = true,
                 type = type
@@ -263,12 +265,14 @@ M.next_mark = function(forward)
         if forward then
             -- Search forward for next mark
             for i = 1, #current_marks do
-                if current_marks[i].lnum <= current_line then
-                    i = i + 1
-                else
-                    -- Auto-center cursor on mark
-                    vim.cmd("normal! `" .. current_marks[i].mark .. "zz")
-                    return true
+                local mark = current_marks[i]
+                -- Skip builtin marks if set in config
+                if not (config.options.builtin_marks.skip_navigation and mark.builtin) then
+                    if mark.lnum > current_line then
+                        -- Auto-center cursor on mark
+                        vim.cmd("normal! `" .. mark.mark .. "zz")
+                        return true
+                    end
                 end
             end
             -- If no next mark is found, loop back to first mark
@@ -277,11 +281,14 @@ M.next_mark = function(forward)
         else
             -- Search backward for previous mark
             for i = #current_marks, 1, -1 do
-                if current_marks[i].lnum >= current_line then
-                else
-                    -- Auto-center cursor on mark
-                    vim.cmd("normal! `" .. current_marks[i].mark .. "zz")
-                    return true
+                local mark = current_marks[i]
+                -- Skip builtin marks if set in config
+                if not (config.options.builtin_marks.skip_navigation and mark.builtin) then
+                    if mark.lnum < current_line then
+                        -- Auto-center cursor on mark
+                        vim.cmd("normal! `" .. mark.mark .. "zz")
+                        return true
+                    end
                 end
             end
             -- If no previous mark is found, loop back to last mark

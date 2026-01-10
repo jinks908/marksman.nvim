@@ -21,7 +21,7 @@
 
 local M = {}
 
-M.version = "1.4.4"
+M.version = "1.4.5"
 M.min_nvim_version = "0.8.0"
 
 -- Store setup state
@@ -166,6 +166,9 @@ function M.setup(opts)
             end, default_opts)
         end
     end
+
+    -- IMPORTANT (DEBUG)
+    M.get_marks = marks.get_marks
 
     -- Export all public functions
     M.set_mark = marks.set_mark

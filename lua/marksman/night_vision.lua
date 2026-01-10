@@ -150,7 +150,7 @@ local function apply_marks_for_line(bufnr, mark)
     apply_sign_column_extmark(bufnr, mark)
 
     -- Apply builtin mark styling
-    if mark.builtin then
+    if mark.builtin and mark.enabled then
         apply_builtin_mark_extmark(bufnr, mark)
     end
 end
@@ -178,6 +178,9 @@ local function refresh_all_virtual_text()
     -- Re-add virtual text for all marked lines
     local line_num = -1
     for _, mark in ipairs(current_marks) do
+        if mark.builtin and not mark.enabled then
+            goto continue
+        end
         -- Avoid duplicate VT icons on same line
         if is_valid_line(bufnr, mark.lnum) then
             local cursor_is_on = (current_cursor == mark.lnum)
@@ -187,6 +190,7 @@ local function refresh_all_virtual_text()
             cursor_on_marked_lines[bufnr][mark.lnum] = cursor_is_on
         end
     end
+        ::continue::
 end
 
 -- Core function to apply all marks to a buffer
@@ -302,6 +306,10 @@ function M.update_virtual_text_for_cursor()
     local line_num = -1
     for _, mark in ipairs(current_marks) do
         if not is_valid_line(bufnr, mark.lnum) then
+            goto continue
+        end
+
+        if mark.builtin and not mark.enabled then
             goto continue
         end
 
