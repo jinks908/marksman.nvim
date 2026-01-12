@@ -52,6 +52,25 @@ local function is_valid_line(bufnr, lnum)
     return lnum > 0 and lnum <= line_count
 end
 
+local function exclude_buffer(bufnr)
+    local buftype = vim.bo[bufnr].buftype
+    local filetype = vim.bo[bufnr].filetype
+
+    for _, type in ipairs(config.options.night_vision.exclude.buffer_types) do
+        if buftype == type then
+            return true
+        end
+    end
+
+    for _, type in ipairs(config.options.night_vision.exclude.filetypes) do
+        if filetype == type then
+            return true
+        end
+    end
+
+    return false
+end
+
 -- Helper function to clear buffer-specific signs
 local function clear_buffer_signs(bufnr)
     if buffer_signs[bufnr] then
@@ -404,9 +423,13 @@ end
 -- Auto-apply Night Vision to new buffers when they're opened
 vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
     callback = function()
+        local bufnr = vim.api.nvim_get_current_buf()
         -- Small delay to ensure marks are loaded
         vim.defer_fn(function()
-            apply_night_vision_to_buffer()
+            -- Check if current buffer should be excluded
+            if not exclude_buffer(bufnr) then
+                apply_night_vision_to_buffer()
+            end
         end, 10)
     end
 })

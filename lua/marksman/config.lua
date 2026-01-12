@@ -93,6 +93,19 @@ M.defaults = {
             last_jump = { fg = "#53adf9", bg = "NONE", bold = true },
             last_exit = { fg = "#be86f7", bg = "NONE", bold = true },
         },
+        exclude = {
+            filetypes = {
+                "help",
+                "dashboard",
+                "DiffviewFiles",
+            },
+            buffer_types = {
+                "nofile",
+                "nowrite",
+                "terminal",
+                "prompt",
+            },
+        },
     },
     -- Leave empty to disable keymap
     keymaps = {
