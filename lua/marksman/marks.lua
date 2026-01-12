@@ -263,6 +263,11 @@ M.next_mark = function(forward)
         vim.notify(' No other marks in current buffer', vim.log.levels.INFO)
     else
         if forward then
+
+            -- TODO
+            -- [ ] !Put for loop inside helper function and call it recursively
+            -- ! If no mark found on first pass, manually set `current_line = 1` and loop again
+
             -- Search forward for next mark
             for i = 1, #current_marks do
                 local mark = current_marks[i]

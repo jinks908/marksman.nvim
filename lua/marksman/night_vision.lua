@@ -52,7 +52,13 @@ local function is_valid_line(bufnr, lnum)
     return lnum > 0 and lnum <= line_count
 end
 
+-- Helper function to check user exclusions
 local function exclude_buffer(bufnr)
+    -- Validate buffer
+    if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+        return true
+    end
+
     local buftype = vim.bo[bufnr].buftype
     local filetype = vim.bo[bufnr].filetype
 
@@ -218,6 +224,11 @@ end
 local function apply_marks_to_buffer(bufnr, should_clear)
     local current_marks = marks.get_marks()
 
+    -- Early exit if buffer should be excluded
+    if exclude_buffer(bufnr) then
+        return
+    end
+
     if should_clear then
         -- Clear existing marks
         vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
@@ -281,6 +292,11 @@ end
 --- @return nil
 function M.update_virtual_text_for_cursor()
     local bufnr = vim.api.nvim_get_current_buf()
+
+    -- Early exit if buffer should be excluded
+    if exclude_buffer(bufnr) then
+        return
+    end
 
     -- Early exit if Night Vision is not active
     if not M.nv_state[bufnr] then
@@ -351,6 +367,15 @@ end
 function M.toggle()
     local bufnr = vim.api.nvim_get_current_buf()
 
+    -- Early exit if buffer should be excluded
+    if exclude_buffer(bufnr) then
+        vim.notify(' Night Vision is currently disabled for this buffer. Please check your config to change.', vim.log.levels.WARN, {
+            title = " Marksman " .. config.options.night_vision.virtual_text,
+            timeout = 2000
+        })
+        return
+    end
+
     -- Initialize buffer signs tracking if needed
     if not buffer_signs[bufnr] then
         buffer_signs[bufnr] = {}
@@ -401,6 +426,11 @@ end
 --- @return nil
 local function apply_night_vision_to_buffer()
     local bufnr = vim.api.nvim_get_current_buf()
+
+    -- Early exit if buffer should be excluded
+    if exclude_buffer(bufnr) then
+        return
+    end
 
     -- Initialize Night Vision state for this buffer if needed
     if M.nv_state[bufnr] == nil then
