@@ -261,45 +261,55 @@ M.next_mark = function(forward)
     -- If cursor is on the only mark, notify
     elseif #current_marks == 1 and current_marks[1].lnum == current_line then
         vim.notify(' No other marks in current buffer', vim.log.levels.INFO)
-    else
-        if forward then
+        return true
+    end
 
-            -- TODO
-            -- [ ] !Put for loop inside helper function and call it recursively
-            -- ! If no mark found on first pass, manually set `current_line = 1` and loop again
+    -- Filter out builtin marks if configured to skip them
+    local filtered_marks = current_marks
+    if config.options.builtin_marks.skip_navigation then
+        filtered_marks = vim.tbl_filter(function(mark)
+            return not mark.builtin
+        end, current_marks)
 
-            -- Search forward for next mark
-            for i = 1, #current_marks do
-                local mark = current_marks[i]
-                -- Skip builtin marks if set in config
-                if not (config.options.builtin_marks.skip_navigation and mark.builtin) then
-                    if mark.lnum > current_line then
-                        -- Auto-center cursor on mark
-                        vim.cmd("normal! `" .. mark.mark .. "zz")
-                        return true
-                    end
-                end
-            end
-            -- If no next mark is found, loop back to first mark
-            vim.cmd("normal! `" .. current_marks[1].mark .. "zz")
-            return true
-        else
-            -- Search backward for previous mark
-            for i = #current_marks, 1, -1 do
-                local mark = current_marks[i]
-                -- Skip builtin marks if set in config
-                if not (config.options.builtin_marks.skip_navigation and mark.builtin) then
-                    if mark.lnum < current_line then
-                        -- Auto-center cursor on mark
-                        vim.cmd("normal! `" .. mark.mark .. "zz")
-                        return true
-                    end
-                end
-            end
-            -- If no previous mark is found, loop back to last mark
-            vim.cmd("normal! `" .. current_marks[#current_marks].mark .. "zz")
+        -- Check if no marks remain after filtering
+        if #filtered_marks == 0 then
+            vim.notify(' No navigable marks in current buffer', vim.log.levels.WARN)
             return true
         end
+    end
+
+    local target_mark = nil
+
+    if forward then
+        -- Find first mark after current line
+        for _, mark in ipairs(filtered_marks) do
+            if mark.lnum > current_line then
+                target_mark = mark
+                break
+            end
+        end
+        -- Wrap to first mark if none found
+        if not target_mark then
+            target_mark = filtered_marks[1]
+        end
+    else
+        -- Find last mark before current line
+        for i = #filtered_marks, 1, -1 do
+            local mark = filtered_marks[i]
+            if mark.lnum < current_line then
+                target_mark = mark
+                break
+            end
+        end
+        -- Wrap to last mark if none found
+        if not target_mark then
+            target_mark = filtered_marks[#filtered_marks]
+        end
+    end
+
+    -- Jump to target mark and center
+    if target_mark then
+        vim.cmd("normal! `" .. target_mark.mark .. "zz")
     end
 end
 

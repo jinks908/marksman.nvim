@@ -1,13 +1,22 @@
 # Changelog
 
-## [1.4.5] - 2025-01-09
+## [1.5.0] - 2026-01-12
+
+### Feature
+- Exclude specific buftypes/filetypes for Night Vision
+
+### Fixed
+- `skip_navigation` wrap-around bug
+
+
+## [1.4.5] - 2026-01-09
 
 ### Added
 - Option to ignore builtin marks from next/prev navigation
 - Enable/disable builtin mark types in Telescope picker
 
 
-## [1.4.4] - 2025-01-06
+## [1.4.4] - 2026-01-06
 
 ### Fixed
 - Replace `night_vision.nv_state` with correct `night_vision.nv_state[bufnr]` (for per-buffer behavior)
@@ -15,14 +24,14 @@
 - Refactor notification logic (i.e., whether `silent = true/false` is set) 
 
 
-## [1.4.3] - 2025-01-04
+## [1.4.3] - 2026-01-04
 
 ### Fixed
 - Sign column / Line number conflicts with multi-marked lines (i.e., manual marks vs builtin marks)
 - Refactored Night Vision core logic for better maintainability
 
 
-## [1.4.2] - 2025-01-03
+## [1.4.2] - 2026-01-03
 
 ### Changed
 - Builtin marks are unaffected by toggle function

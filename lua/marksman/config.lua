@@ -95,11 +95,13 @@ M.defaults = {
         },
         exclude = {
             filetypes = {
+                defaults = true, -- Set to `false` to enable the following exclusions
                 "help",
                 "dashboard",
                 "DiffviewFiles",
             },
             buffer_types = {
+                defaults = true, -- Set to `false` to enable the following exclusions
                 "nofile",
                 "nowrite",
                 "terminal",
