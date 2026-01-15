@@ -377,4 +377,4 @@ require('marksman').setup({
 
 ---
 
-*Last Updated: 2025-12-30 | Plugin Version: 1.4.5 | Neovim: 0.8.0+*
+*Last Updated: 2026-01-15 | Plugin Version: 1.6.0 | Neovim: 0.8.0+*

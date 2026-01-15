@@ -82,11 +82,17 @@ function M.marks(opts, mode)
 
                     -- Determine highlight groups based on mark type
                     if entry_tb.value.builtin then
-                        -- Display custom sign for builtin marks
+                        -- Builtin marks
                         mark = entry_tb.value.sign
                         mark_hl = "BuiltinMark_" .. entry_tb.value.type
                         lnum_hl = "BuiltinMark_" .. entry_tb.value.type
+                    elseif entry_tb.value.githunk then
+                        -- Git hunks
+                        mark = entry_tb.value.sign
+                        mark_hl = "GitHunk_" .. entry_tb.value.type
+                        lnum_hl = "GitHunk_" .. entry_tb.value.type
                     else
+                        -- User marks
                         mark = entry_tb.value.mark
                         mark_hl = "MarksmanMark"
                         lnum_hl = "MarksmanLine"
@@ -129,21 +135,26 @@ function M.marks(opts, mode)
             end
 
             -- Function to jump to mark
-            local function goto_mark(mark_letter)
-                if isMark(mark_letter) == "true" then
+            local function goto_mark(mark)
+                if mark.githunk then
                     actions.close(prompt_bufnr)
-                    vim.cmd("normal! `" .. mark_letter)
-                    vim.cmd("normal! zz")
+                    vim.cmd("normal! " .. mark.lnum .. "Gzz")
                 else
-                    actions.close(prompt_bufnr)
-                    vim.notify(" Mark '" .. mark_letter .. "' not set.", vim.log.levels.WARN, { title = " Marksman  " })
+                    if isMark(mark.mark) == "true" then
+                        actions.close(prompt_bufnr)
+                        vim.cmd("normal! `" .. mark.mark)
+                        vim.cmd("normal! zz")
+                    else
+                        actions.close(prompt_bufnr)
+                        vim.notify(" Mark '" .. mark.mark .. "' not set.", vim.log.levels.WARN, { title = " Marksman  " })
+                    end
                 end
             end
 
             -- Default action for selecting entry with <Enter>
             actions.select_default:replace(function()
                 local selection = action_state.get_selected_entry()
-                goto_mark(selection.value.mark)
+                goto_mark(selection.value)
             end)
 
             -- Override default normal mode mappings

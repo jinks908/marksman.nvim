@@ -75,10 +75,10 @@ M.defaults = {
     git_hunks = {
         enabled = true,
         add = {
-            sign = "+",
-            line_nr = true,
-            virtual_text = "+",
-            show_in_picker = true,
+            sign = "+", -- Set to `false` to disable
+            line_nr = true, -- Set to `false` to disable
+            virtual_text = "+", -- Set to `false` to disable
+            show_in_picker = true, -- Show in Telescope picker
         },
         delete = {
             sign = "-",

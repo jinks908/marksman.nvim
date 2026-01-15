@@ -376,7 +376,7 @@ function M.update_virtual_text_for_cursor()
             goto continue
         end
 
-        if mark.builtin and not mark.enabled then
+        if (mark.builtin or mark.githunk) and not mark.enabled then
             goto continue
         end
 
@@ -493,7 +493,7 @@ vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
             if not exclude_buffer(bufnr) then
                 apply_night_vision_to_buffer()
             end
-        end, 10)
+        end, 100)
     end
 })
 

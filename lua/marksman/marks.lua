@@ -55,9 +55,9 @@ end
 -- Helper function to get git hunk sign based on type
 local function get_git_hunk_sign(type)
     local signs = {
-        ["add"] = "+",
-        ["delete"] = "-",
-        ["change"] = "~",
+        ["add"] = config.options.git_hunks.add.sign,
+        ["delete"] = config.options.git_hunks.delete.sign,
+        ["change"] = config.options.git_hunks.change.sign,
     }
     return signs[type] or "?"
 end
@@ -125,6 +125,7 @@ function M.get_git_hunks()
         table.insert(hunk_marks, {
             filename = vim.api.nvim_buf_get_name(0),
             lnum = start,
+            end_lnum = start + (hunk.added.count + hunk.removed.count) - 1,
             enabled = config.options.git_hunks.enabled,
             mark = get_git_hunk_sign(hunk.type),
             sign = get_git_hunk_sign(hunk.type),
@@ -140,7 +141,7 @@ function M.get_git_hunks()
         })
     end
 
-    -- Sort (builtin marks would appear in position order)
+    -- Sort by line number
     table.sort(hunk_marks, function(a, b)
         return a.lnum < b.lnum
     end)
@@ -306,7 +307,7 @@ M.toggle_mark = function()
     local marks = M.get_marks()
 
     for _, mark in ipairs(marks) do
-        if mark.lnum == line and not mark.builtin then
+        if mark.lnum == line and not mark.builtin and not mark.githunk then
             M.delete_mark()
             return
         end
@@ -375,8 +376,10 @@ M.next_mark = function(forward)
         end
     end
 
-    -- Jump to target mark and center
-    if target_mark then
+    -- If git hunk, jump to line number, else use backtick mark
+    if target_mark.githunk then
+        vim.cmd("normal! " .. target_mark.lnum .. "Gzz")
+    else
         vim.cmd("normal! `" .. target_mark.mark .. "zz")
     end
 end
@@ -398,7 +401,7 @@ M.delete_mark = function()
 
     -- Search for mark on current line
     for i = 1, #current_marks do
-        if current_marks[i].lnum == current_line and not current_marks[i].builtin then
+        if current_marks[i].lnum == current_line and not current_marks[i].builtin and not current_marks[i].githunk then
             -- Delete mark
             vim.cmd("delmark " .. current_marks[i].mark)
             data.remove_timestamp(current_marks[i].mark)

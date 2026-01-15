@@ -1,7 +1,11 @@
 # Changelog
 
-> [!caution] CURRENT CHANGES
-> ## [1.5.1] - 2026-01-15
+## [1.6.0] - 2026-01-15
+
+### Feature
+- Gitsigns integration for Marksman/Night Vision/Telescope picker
+    - Show git hunks as marks in Telescope picker
+    - Jump to next/previous git hunk with Night Vision navigation commands
 
 ### Added
 - `acwrite` to exluded buftypes in default config
