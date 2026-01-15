@@ -1,5 +1,16 @@
 # Changelog
 
+> [!caution] CURRENT CHANGES
+> ## [1.5.1] - 2026-01-15
+
+### Added
+- `acwrite` to exluded buftypes in default config
+
+### Fixed
+- Disable default buftype/filetype exclusions
+
+---
+
 ## [1.5.0] - 2026-01-12
 
 ### Feature
@@ -8,6 +19,7 @@
 ### Fixed
 - `skip_navigation` wrap-around bug
 
+---
 
 ## [1.4.5] - 2026-01-09
 
@@ -15,6 +27,7 @@
 - Option to ignore builtin marks from next/prev navigation
 - Enable/disable builtin mark types in Telescope picker
 
+---
 
 ## [1.4.4] - 2026-01-06
 
@@ -23,6 +36,7 @@
 - Remove redundant `get_config_options()` function (just use `local config = require('marksman.config')`)
 - Refactor notification logic (i.e., whether `silent = true/false` is set) 
 
+---
 
 ## [1.4.3] - 2026-01-04
 
@@ -30,6 +44,7 @@
 - Sign column / Line number conflicts with multi-marked lines (i.e., manual marks vs builtin marks)
 - Refactored Night Vision core logic for better maintainability
 
+---
 
 ## [1.4.2] - 2026-01-03
 
@@ -38,6 +53,7 @@
 - Added line number option for builtin marks
 - Option to enable/disable specific builtin mark types
 
+---
 
 ## [1.4.0] - 2025-12-31
 
@@ -45,6 +61,7 @@
 - Create configs for default Marksman keymaps
 - Enable manual keymaps for setting/deleting marks (i.e., `ma`/`dma`, `mb`/`dmb`, etc.) by default
 
+---
 
 ## [1.3.4] - 2025-12-31
 
@@ -53,12 +70,14 @@
 - Custom sign column icons for builtin marks
 - Custom virtual text for builtin marks
 
+---
 
 ## [1.3.3] - 2025-12-30
 
 ### Added
 - Separate highlights for builtin marks in Telescope picker
 
+---
 
 ## [1.3.2] - 2025-12-30
 
@@ -69,6 +88,7 @@
 ### Changed
 - Refactor config options structure (merge highlight settings)
 
+---
 
 ## [1.3.0] - 2025-12-30
 
@@ -77,6 +97,7 @@
     - Option to enable/disable
     - Set custom Night Vision highlights for builtin marks
 
+---
 
 ## [1.2.0] - 2025-12-25
 
@@ -88,18 +109,21 @@
 - Unused `hide_line`/`show_line`/`get_sign_name` functions
 - Unused variables
 
+---
 
 ## [1.1.2] - 2025-12-25
 
 ### Added
 - Set custom sign column character/icon
 
+---
 
 ## [1.1.1] - 2025-12-25
 
 ### Added
 - Set virtual text to mark letter
 
+---
 
 ## [1.1.0] - 2025-12-25
 
@@ -108,6 +132,7 @@
 - Enable/disable virtual text
 - Set custom virtual text for Night Vision
 
+---
 
 ## [1.0.0] - 2025-12-22
 
@@ -129,6 +154,8 @@
 ### Changed
 
 - Removed temporary section comments from codebase for cleaner code organization
+
+---
 
 ## [0.9.0-alpha] - 2025-12-21
 

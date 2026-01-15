@@ -95,18 +95,11 @@ M.defaults = {
         },
         exclude = {
             filetypes = {
-                defaults = true, -- Set to `false` to enable the following exclusions
-                "help",
-                "dashboard",
-                "DiffviewFiles",
-            },
+                defaults = true, -- Set to `false` to disable the following exclusions:
+            },                   -- "help", "dashboard", "DiffviewFiles"
             buffer_types = {
-                defaults = true, -- Set to `false` to enable the following exclusions
-                "nofile",
-                "nowrite",
-                "terminal",
-                "prompt",
-            },
+                defaults = true, -- Set to `false` to disable the following exclusions
+            },                   -- "nofile", "nowrite", "acwrite", "terminal", "prompt"
         },
     },
     -- Leave empty to disable keymap
@@ -139,11 +132,26 @@ local valid_sort_options = {
     recency = true,
 }
 
+-- Default exclusions for Night Vision
+M.default_excludes = {
+    filetypes = { "help", "dashboard", "DiffviewFiles" },
+    buffer_types = { "nofile", "nowrite", "acwrite", "terminal", "prompt" }
+}
+
 --- Merge user configuration options with defaults and validate
 --- @param opts? table User configuration options to merge with defaults
 --- @return nil
 function M.setup(opts)
     M.options = vim.tbl_deep_extend("force", M.defaults, opts or {})
+
+    -- Merge default exclusions if enabled
+    if M.options.night_vision.exclude.buffer_types.defaults then
+        M.options.night_vision.exclude.buffer_types = vim.tbl_deep_extend("force", M.default_excludes.buffer_types, M.options.night_vision.exclude.buffer_types or {})
+    end
+    if M.options.night_vision.exclude.filetypes.defaults then
+        M.options.night_vision.exclude.filetypes = vim.tbl_deep_extend("force", M.default_excludes.filetypes, M.options.night_vision.exclude.filetypes or {})
+    end
+
     -- Validate after setup
     M.validate_config()
 end

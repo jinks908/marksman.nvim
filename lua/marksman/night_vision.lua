@@ -59,9 +59,11 @@ local function exclude_buffer(bufnr)
         return true
     end
 
+    -- Check buffer types
     local buftype = vim.bo[bufnr].buftype
     local filetype = vim.bo[bufnr].filetype
 
+    -- Check user config
     for _, type in ipairs(config.options.night_vision.exclude.buffer_types) do
         if buftype == type then
             return true
