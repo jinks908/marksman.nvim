@@ -33,6 +33,7 @@ M.nv_state = {}
 local ns_id = vim.api.nvim_create_namespace('Marksman')
 local ns_id_vt = vim.api.nvim_create_namespace('MarksmanVT')
 local ns_id_builtin = vim.api.nvim_create_namespace('BuiltinMarks')
+local ns_id_githunk = vim.api.nvim_create_namespace('GitHunks')
 
 -- Buffer-specific sign tracking
 local buffer_signs = {}
@@ -85,6 +86,7 @@ local function clear_buffer_signs(bufnr)
         for extmark_id, _ in pairs(buffer_signs[bufnr]) do
             pcall(vim.api.nvim_buf_del_extmark, bufnr, ns_id, extmark_id)
             pcall(vim.api.nvim_buf_del_extmark, bufnr, ns_id_builtin, extmark_id)
+            pcall(vim.api.nvim_buf_del_extmark, bufnr, ns_id_githunk, extmark_id)
         end
         buffer_signs[bufnr] = {}
     end
@@ -101,6 +103,8 @@ local function get_virtual_text_content(mark, cursor_is_on)
     end
     if mark.builtin then
         return config.options.builtin_marks[mark.type].virtual_text or ''
+    elseif mark.githunk then
+        return config.options.git_hunks[mark.type].virtual_text or ''
     elseif config.options.night_vision.virtual_text == "letter" then
         return mark.mark .. ' '
     else
@@ -112,6 +116,8 @@ end
 local function get_virtual_text_hl_group(mark)
     if mark.builtin then
         return 'BuiltinMark_' .. mark.type
+    elseif mark.githunk then
+        return 'GitHunk_' .. mark.type
     else
         return 'NightVisionVirtualText'
     end
@@ -129,7 +135,7 @@ end
 
 -- Helper function to apply sign column extmark
 local function apply_sign_column_extmark(bufnr, mark)
-    if config.options.night_vision.sign_column == "none" or mark.builtin then
+    if config.options.night_vision.sign_column == "none" or mark.builtin or mark.githunk then
         return
     end
 
@@ -154,6 +160,18 @@ local function apply_builtin_mark_extmark(bufnr, mark)
     buffer_signs[bufnr][extmark_id] = true
 end
 
+-- Helper function to apply git hunk extmark
+local function apply_git_hunk_extmark(bufnr, mark)
+    local hl_type = mark.type
+    local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id_githunk, mark.lnum - 1, 0, {
+        sign_text = mark.sign or '',
+        sign_hl_group = mark.sign and "GitHunk_" .. hl_type or nil,
+        number_hl_group = mark.line_hl and "GitHunk_" .. hl_type or nil,
+        priority = 3000
+    })
+    buffer_signs[bufnr][extmark_id] = true
+end
+
 -- Helper function to apply all extmarks for a single marked line
 local function apply_marks_for_line(bufnr, mark)
     -- Apply line background highlight
@@ -165,7 +183,7 @@ local function apply_marks_for_line(bufnr, mark)
     end
 
     -- Apply line number highlight (non-builtin marks only)
-    if config.options.night_vision.line_nr_highlight and not mark.builtin then
+    if config.options.night_vision.line_nr_highlight and not mark.builtin and not mark.githunk then
         local extmark_id = vim.api.nvim_buf_set_extmark(bufnr, ns_id, mark.lnum - 1, 0, {
             number_hl_group = "NightVisionLineNr",
             priority = 5000
@@ -179,6 +197,11 @@ local function apply_marks_for_line(bufnr, mark)
     -- Apply builtin mark styling
     if mark.builtin and mark.enabled then
         apply_builtin_mark_extmark(bufnr, mark)
+    end
+
+    -- Apply git hunk styling
+    if mark.githunk and mark.enabled then
+        apply_git_hunk_extmark(bufnr, mark)
     end
 end
 
@@ -236,6 +259,7 @@ local function apply_marks_to_buffer(bufnr, should_clear)
         vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
         vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, 0, -1)
         vim.api.nvim_buf_clear_namespace(bufnr, ns_id_builtin, 0, -1)
+        vim.api.nvim_buf_clear_namespace(bufnr, ns_id_githunk, 0, -1)
         clear_buffer_signs(bufnr)
         M.mark_lines = {}
     end
@@ -254,6 +278,7 @@ local function apply_marks_to_buffer(bufnr, should_clear)
             vim.api.nvim_buf_clear_namespace(bufnr, ns_id, mark.lnum, mark.lnum + 1)
             vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, mark.lnum, mark.lnum + 1)
             vim.api.nvim_buf_clear_namespace(bufnr, ns_id_builtin, mark.lnum, mark.lnum + 1)
+            vim.api.nvim_buf_clear_namespace(bufnr, ns_id_githunk, mark.lnum, mark.lnum + 1)
             table.insert(M.mark_lines, mark.lnum)
             apply_marks_for_line(bufnr, mark)
         else
@@ -287,6 +312,11 @@ function M.setup_highlights()
     vim.api.nvim_set_hl(0, 'BuiltinMark_last_jump_line', config.options.night_vision.highlights.last_jump_line)
     vim.api.nvim_set_hl(0, 'BuiltinMark_last_jump', config.options.night_vision.highlights.last_jump)
     vim.api.nvim_set_hl(0, 'BuiltinMark_last_exit', config.options.night_vision.highlights.last_exit)
+
+    -- Git hunk highlights
+    vim.api.nvim_set_hl(0, 'GitHunk_add', config.options.night_vision.highlights.add)
+    vim.api.nvim_set_hl(0, 'GitHunk_delete', config.options.night_vision.highlights.delete)
+    vim.api.nvim_set_hl(0, 'GitHunk_change', config.options.night_vision.highlights.change)
 end
 
 --- Update virtual text decorations based on cursor position
@@ -388,6 +418,7 @@ function M.toggle()
         vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
         vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, 0, -1)
         vim.api.nvim_buf_clear_namespace(bufnr, ns_id_builtin, 0, -1)
+        vim.api.nvim_buf_clear_namespace(bufnr, ns_id_githunk, 0, -1)
         clear_buffer_signs(bufnr)
         M.mark_lines = {}
         if not config.options.night_vision.silent then

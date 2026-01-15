@@ -23,6 +23,13 @@ local M = {}
 local config = require('marksman.config')
 local data = require('marksman.data')
 
+-- Check if gitsigns is available
+local ok, gitsigns = pcall(require, 'gitsigns')
+if not ok then
+    vim.notify('gitsigns is not installed', vim.log.levels.ERROR)
+    return
+end
+
 -- Reference to night_vision module
 local night_vision
 
@@ -43,6 +50,16 @@ local function get_builtin_mark_type(mark)
         ["last_exit"] = '"',
     }
     return types[mark] or "unknown"
+end
+
+-- Helper function to get git hunk sign based on type
+local function get_git_hunk_sign(type)
+    local signs = {
+        ["add"] = "+",
+        ["delete"] = "-",
+        ["change"] = "~",
+    }
+    return signs[type] or "?"
 end
 
 -- Helper function to get builtin marks
@@ -74,6 +91,7 @@ M.get_builtin_marks = function()
                 picker = opts.show_in_picker,
                 display = line_content:gsub('^%s*', ''),
                 builtin = true,
+                githunk = false,
                 type = type
             })
         end
@@ -87,6 +105,48 @@ M.get_builtin_marks = function()
     return builtin_marks
 end
 
+-- Helper function to get git hunks as marks
+function M.get_git_hunks()
+    local bufnr = vim.api.nvim_get_current_buf()
+
+    if not config.options.night_vision.enabled then
+        return {}
+    end
+
+    local hunks = gitsigns.get_hunks(bufnr)
+    if not hunks then
+        return {}
+    end
+
+    local hunk_marks = {}
+
+    for type, hunk in pairs(hunks) do
+        local start = hunk.added.start > 0 and hunk.added.start or hunk.removed.start
+        table.insert(hunk_marks, {
+            filename = vim.api.nvim_buf_get_name(0),
+            lnum = start,
+            enabled = config.options.git_hunks.enabled,
+            mark = get_git_hunk_sign(hunk.type),
+            sign = get_git_hunk_sign(hunk.type),
+            line_hl = config.options.git_hunks[hunk.type].line_nr,
+            vt = config.options.git_hunks[hunk.type].virtual_text,
+            picker = config.options.git_hunks.show_in_picker,
+            builtin = false,
+            githunk = true,
+            type = hunk.type,
+            col = 1,
+            display = hunk.added.lines[1] or hunk.removed.lines[1],
+            text = string.format("[%s] Line %d", hunk.type, start)
+        })
+    end
+
+    -- Sort (builtin marks would appear in position order)
+    table.sort(hunk_marks, function(a, b)
+        return a.lnum < b.lnum
+    end)
+
+    return hunk_marks
+end
 
 --- Get all marks in current buffer with metadata
 --- Returns marks sorted by configured method (line, alphabetical, or recency)
@@ -129,6 +189,14 @@ function M.get_marks()
     if config.options.builtin_marks.enabled then
         local builtin = M.get_builtin_marks()
         for _, mark in ipairs(builtin) do
+            table.insert(marks_list, mark)
+        end
+    end
+
+    -- Add git hunk marks if enabled
+    if config.options.git_hunks.enabled then
+        local hunk_marks = M.get_git_hunks()
+        for _, mark in ipairs(hunk_marks) do
             table.insert(marks_list, mark)
         end
     end

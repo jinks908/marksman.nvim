@@ -72,6 +72,27 @@ M.defaults = {
             show_in_picker = true,
         },
     },
+    git_hunks = {
+        enabled = true,
+        add = {
+            sign = "+",
+            line_nr = true,
+            virtual_text = "+",
+            show_in_picker = true,
+        },
+        delete = {
+            sign = "-",
+            line_nr = true,
+            virtual_text = "-",
+            show_in_picker = true,
+        },
+        change = {
+            sign = "~",
+            line_nr = true,
+            virtual_text = "~",
+            show_in_picker = true,
+        },
+    },
     -- Night Vision configuration and highlights
     night_vision = {
         enabled = true,
@@ -92,6 +113,9 @@ M.defaults = {
             last_jump_line = { fg = "#53adf9", bg = "NONE", bold = true },
             last_jump = { fg = "#53adf9", bg = "NONE", bold = true },
             last_exit = { fg = "#be86f7", bg = "NONE", bold = true },
+            add = { fg = "#00ffaf", bg = "NONE", bold = true },
+            delete = { fg = "#f7768e", bg = "NONE", bold = true },
+            change = { fg = "#f6be55", bg = "NONE", bold = true },
         },
         exclude = {
             filetypes = {
