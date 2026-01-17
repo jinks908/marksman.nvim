@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.6.1] - 2026-01-17
+
+### Fixed
+- Critical bug in `refresh_all_virtual_text()` where `::continue::` label was placed outside the loop, causing virtual text to not display for marks after disabled builtin marks
+- Incorrect namespace clear parameters using 1-indexed line numbers instead of 0-indexed, causing marks to be cleared from wrong lines
+- Refactored `apply_marks_to_buffer()` logic to properly skip invalid lines and handle duplicate marks on same line
+- Inconsistent buffer state initialization across functions, preventing potential nil reference errors
+
+---
+
 ## [1.6.0] - 2026-01-15
 
 ### Feature

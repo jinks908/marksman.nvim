@@ -53,6 +53,19 @@ local function is_valid_line(bufnr, lnum)
     return lnum > 0 and lnum <= line_count
 end
 
+-- Helper function to ensure buffer state is initialized
+local function ensure_buffer_state(bufnr)
+    if not buffer_signs[bufnr] then
+        buffer_signs[bufnr] = {}
+    end
+    if not cursor_on_marked_lines[bufnr] then
+        cursor_on_marked_lines[bufnr] = {}
+    end
+    if not vt_extmark_ids[bufnr] then
+        vt_extmark_ids[bufnr] = {}
+    end
+end
+
 -- Helper function to check user exclusions
 local function exclude_buffer(bufnr)
     -- Validate buffer
@@ -211,15 +224,8 @@ local function refresh_all_virtual_text()
     local current_marks = marks.get_marks()
     local current_cursor = vim.api.nvim_win_get_cursor(0)[1]
 
-    -- Initialize cursor state for this buffer if needed
-    if not cursor_on_marked_lines[bufnr] then
-        cursor_on_marked_lines[bufnr] = {}
-    end
-
-    -- Initialize VT extmark IDs for this buffer if needed
-    if not vt_extmark_ids[bufnr] then
-        vt_extmark_ids[bufnr] = {}
-    end
+    -- Ensure buffer state is initialized
+    ensure_buffer_state(bufnr)
 
     -- Clear all virtual text for this buffer
     vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, 0, -1)
@@ -239,8 +245,8 @@ local function refresh_all_virtual_text()
             vt_extmark_ids[bufnr][mark.lnum] = extmark_id
             cursor_on_marked_lines[bufnr][mark.lnum] = cursor_is_on
         end
-    end
         ::continue::
+    end
 end
 
 -- Core function to apply all marks to a buffer
@@ -253,6 +259,9 @@ local function apply_marks_to_buffer(bufnr, should_clear)
     if exclude_buffer(bufnr) then
         return
     end
+
+    -- Ensure buffer state is initialized
+    ensure_buffer_state(bufnr)
 
     if should_clear then
         -- Clear existing marks
@@ -268,23 +277,30 @@ local function apply_marks_to_buffer(bufnr, should_clear)
     M.setup_highlights()
 
     -- Apply marks to buffer, avoiding duplicates on same line
-    local line_num = -1
+    local processed_lines = {}
     for _, mark in ipairs(current_marks) do
-        if is_valid_line(bufnr, mark.lnum) and mark.lnum ~= line_num then
-            line_num = mark.lnum
-            table.insert(M.mark_lines, mark.lnum)
-            apply_marks_for_line(bufnr, mark)
-        elseif is_valid_line(bufnr, mark.lnum) and not mark.builtin then
-            vim.api.nvim_buf_clear_namespace(bufnr, ns_id, mark.lnum, mark.lnum + 1)
-            vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, mark.lnum, mark.lnum + 1)
-            vim.api.nvim_buf_clear_namespace(bufnr, ns_id_builtin, mark.lnum, mark.lnum + 1)
-            vim.api.nvim_buf_clear_namespace(bufnr, ns_id_githunk, mark.lnum, mark.lnum + 1)
-            table.insert(M.mark_lines, mark.lnum)
-            apply_marks_for_line(bufnr, mark)
-        else
-            table.insert(M.mark_lines, mark.lnum)
-            apply_marks_for_line(bufnr, mark)
+        -- Skip invalid lines entirely
+        if not is_valid_line(bufnr, mark.lnum) then
+            goto skip_mark
         end
+        
+        -- Track marked lines
+        table.insert(M.mark_lines, mark.lnum)
+        
+        -- For duplicate marks on same line, clear first then reapply all
+        if processed_lines[mark.lnum] then
+            -- Clear all namespaces for this specific line (0-indexed)
+            vim.api.nvim_buf_clear_namespace(bufnr, ns_id, mark.lnum - 1, mark.lnum)
+            vim.api.nvim_buf_clear_namespace(bufnr, ns_id_vt, mark.lnum - 1, mark.lnum)
+            vim.api.nvim_buf_clear_namespace(bufnr, ns_id_builtin, mark.lnum - 1, mark.lnum)
+            vim.api.nvim_buf_clear_namespace(bufnr, ns_id_githunk, mark.lnum - 1, mark.lnum)
+        end
+        
+        -- Apply marks
+        apply_marks_for_line(bufnr, mark)
+        processed_lines[mark.lnum] = true
+        
+        ::skip_mark::
     end
 
     -- Apply virtual text if enabled
@@ -340,15 +356,8 @@ function M.update_virtual_text_for_cursor()
         return
     end
 
-    -- Initialize cursor state for this buffer if needed
-    if not cursor_on_marked_lines[bufnr] then
-        cursor_on_marked_lines[bufnr] = {}
-    end
-
-    -- Initialize VT extmark IDs for this buffer if needed
-    if not vt_extmark_ids[bufnr] then
-        vt_extmark_ids[bufnr] = {}
-    end
+    -- Ensure buffer state is initialized
+    ensure_buffer_state(bufnr)
 
     -- Get current cursor position safely
     local ok, cursor_pos = pcall(vim.api.nvim_win_get_cursor, 0)
@@ -408,10 +417,8 @@ function M.toggle()
         return
     end
 
-    -- Initialize buffer signs tracking if needed
-    if not buffer_signs[bufnr] then
-        buffer_signs[bufnr] = {}
-    end
+    -- Ensure buffer state is initialized
+    ensure_buffer_state(bufnr)
 
     -- Toggle off
     if M.nv_state[bufnr] then
@@ -446,10 +453,8 @@ end
 function M.refresh()
     local bufnr = vim.api.nvim_get_current_buf()
 
-    -- Initialize buffer signs tracking if needed
-    if not buffer_signs[bufnr] then
-        buffer_signs[bufnr] = {}
-    end
+    -- Ensure buffer state is initialized
+    ensure_buffer_state(bufnr)
 
     apply_marks_to_buffer(bufnr, true)
     M.nv_state[bufnr] = true
@@ -475,10 +480,8 @@ local function apply_night_vision_to_buffer()
         return
     end
 
-    -- Initialize buffer signs tracking if needed
-    if not buffer_signs[bufnr] then
-        buffer_signs[bufnr] = {}
-    end
+    -- Ensure buffer state is initialized
+    ensure_buffer_state(bufnr)
 
     apply_marks_to_buffer(bufnr, true)
 end
